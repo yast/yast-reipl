@@ -1,0 +1,775 @@
+/* ------------------------------------------------------------------------------
+ * Copyright (c) 2006 Novell, Inc. All Rights Reserved.
+ *
+ *
+ * This program is free software; you can redistribute it and/or modify it under
+ * the terms of version 2 of the GNU General Public License as published by the
+ * Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program; if not, contact Novell, Inc.
+ *
+ * To contact Novell about this file by physical or electronic mail, you may find
+ * current contact information at www.novell.com.
+ * ------------------------------------------------------------------------------
+ */
+
+/**
+ * File:	modules/Reipl.ycp
+ * Package:	Configuration of reipl
+ * Summary:	Reipl settings, input and output functions
+ * Authors:	Mark Hamzy <hamzy@us.ibm.com>
+ *
+ * $Id: Reipl.ycp 27914 2006-02-13 14:32:08Z locilka $
+ *
+ * Representation of the configuration of reipl.
+ * Input and output routines.
+ */
+
+{
+
+module "Reipl";
+textdomain "reipl";
+
+import "Progress";
+import "Report";
+import "Summary";
+import "Message";
+import "FileUtils";
+import "Confirm";
+import "Popup";
+import "Storage";
+import "BootCommon";
+
+/**
+ * Has the user modified the dialog values?
+ * @return boolean return true if modified
+ */
+global boolean Modified();
+
+/**
+ * Data was modified?
+ */
+global boolean modified = false;
+
+/**
+ */
+global boolean proposal_valid = false;
+
+/**
+ * Write only, used during autoinstallation.
+ * Don't run services and SuSEconfig, it's all done at one place.
+ */
+global boolean write_only = false;
+
+/**
+ * Abort function
+ * return boolean return true if abort
+ */
+global boolean() AbortFunction = Modified;
+
+/**
+ * Abort function
+ * @return boolean return true if abort
+ */
+global define boolean Abort() ``{
+    if(AbortFunction != nil)
+    {
+	return AbortFunction () == true;
+    }
+    return false;
+}
+
+/**
+ * Data was modified?
+ * @return true if modified
+ */
+global boolean Modified() {
+    y2debug("modified=%1",modified);
+    return modified;
+}
+
+/**
+ * Indicate that the data was modified
+ */
+global void SetModified() {
+    y2debug ("Reipl::SetModified");
+    modified = true;
+}
+
+/**
+ * Find where sysfs has been mounted.
+ * @return string the root
+ */
+global string FindSysfsRoot () {
+    string    ret    = nil;
+    list<map> mounts = nil;
+
+    mounts = (list<map>)SCR::Read (.etc.mtab);
+
+    foreach (map mount, mounts, ``{
+	y2milestone ("FindSysfsRoot: mount = %1", mount);
+
+	if (ret == nil && mount["vfstype"]:"ERROR" == "sysfs" && mount["spec"]:"ERROR" == "sysfs") {
+	    ret = (string)mount["file"]:nil;
+	}
+    });
+
+    if (ret == nil) {
+	y2error ("FindSysfsRoot: after all this, ret is still nil!");
+
+	// Note: This likely won't work so you need to check the results of calls using what we
+	// are returning now.
+	ret = "/sys";
+    }
+
+    y2milestone ("FindSysfsRoot: returning %1", ret);
+
+    return ret;
+}
+
+// Settings: Define all variables needed for configuration of reipl
+global map <string, any> reipl_configuration = $[];
+// global map <string, any> reipl_configuration = $[
+//	"method":	"ccw",
+//	"ccw":		$[
+//			"device":	"0.0.4711",
+//			"loadparm":	""
+//		],
+//	"fcp":		$[
+//			"device":	"0.0.4711",
+//			"wwpn":		"0x5005076303004711",
+//			"lun":		"0x4711000000000000",
+//			"bootprog":	"0",
+//			"br_lba":	"0"
+//		]
+//];
+
+global string  reipl_directory = FindSysfsRoot () + "/firmware/reipl";
+global string  ccw_directory   = reipl_directory + "/ccw";
+global string  fcp_directory   = reipl_directory + "/fcp";
+global boolean ccw_exists      = FileUtils::IsDirectory (ccw_directory) != nil;
+global boolean fcp_exists      = FileUtils::IsDirectory (fcp_directory) != nil;
+
+/**
+ * Check to see if reipl is supported by the kernel.
+ * @return boolean true if support exists.
+ */
+global boolean SanityCheck () {
+// @TBD The following is broken during install since the id command is missing
+// bash-3.1# find `echo $PATH | tr ':' ' '` -name id
+//	if (!Confirm::MustBeRoot ()) {
+//		y2error ("User must be root!");
+//	}
+
+	if (!FileUtils::IsDirectory (reipl_directory)) {
+		y2error ("Directory does not exist: %1", reipl_directory);
+		return false;
+	}
+
+	if (!ccw_exists && !fcp_exists) {
+		y2error ("Either ccw or fcp must exist under %1", reipl_directory);
+		return false;
+	}
+
+	if (ccw_exists) {
+		if (!FileUtils::Exists (ccw_directory + "/device")) {
+			y2error ("Missing device under %1", ccw_directory);
+			return false;
+		}
+		if (!FileUtils::Exists (ccw_directory + "/loadparm")) {
+			y2error ("Missing loadparm under %1", ccw_directory);
+			return false;
+		}
+	}
+
+	if (fcp_exists) {
+		if (!FileUtils::Exists (fcp_directory + "/device")) {
+			y2error ("Missing device under %1", fcp_directory);
+			return false;
+		}
+		if (!FileUtils::Exists (fcp_directory + "/wwpn")) {
+			y2error ("Missing wwpn under %1", fcp_directory);
+			return false;
+		}
+		if (!FileUtils::Exists (fcp_directory + "/lun")) {
+			y2error ("Missing lun under %1", fcp_directory);
+			return false;
+		}
+		if (!FileUtils::Exists (fcp_directory + "/bootprog")) {
+			y2error ("Missing bootprog under %1", fcp_directory);
+			return false;
+		}
+		if (!FileUtils::Exists (fcp_directory + "/br_lba")) {
+			y2error ("Missing br_lba under %1", fcp_directory);
+			return false;
+		}
+	}
+
+	if (!FileUtils::Exists (reipl_directory + "/reipl_type")) {
+		y2error ("Missing reipl_type under %1", reipl_directory);
+		return false;
+	}
+
+	return true;
+}
+
+/**
+ * Returns the parameters of the boot partition that was found where the
+ * MBR was located.
+ * @return a list of parameters
+ */
+global list<string> FindBootPartition () {
+    list<string> uParts  = nil;
+    boolean      fError  = false;
+    string       command = nil;
+    map          result  = nil;
+
+    // Examples: /dev/dasda2 or /dev/sda3
+    y2milestone ("FindBootPartition: BootPartitionDevice = %1", BootCommon::BootPartitionDevice);
+
+    // Examples: dasda2 or sda3
+    string fullDisk = substring (BootCommon::BootPartitionDevice, 5);
+
+    y2milestone ("FindBootPartition: fullDisk = %1", fullDisk);
+
+    if (substring (fullDisk, 0, 4) == "dasd") {
+
+	string disk = substring (fullDisk, 0, 5);
+
+	y2milestone ("FindBootPartition: found that the MBR uses dasd (%1)", disk);
+
+	// bash-3.1# readlink -m /sys/block/dasda/device
+	// /sys/devices/css0/0.0.0006/0.0.4dcf
+	command = "/usr/bin/readlink -n -m " + FindSysfsRoot () + "/block/" + disk + "/device";
+
+	result = (map)SCR::Execute (.target.bash_output, command);
+
+	if (result["exit"]:-1 != 0) {
+	    y2error ("FindBootPartition: Execute errors and returns %1", result["exit"]:-1);
+	    y2error ("FindBootPartition: Execute stdout is \"%1\"", result["stdout"]:"");
+	    y2error ("FindBootPartition: Execute stderr is \"%1\"", result["stderr"]:"");
+
+	    fError = true;
+	}
+
+	y2milestone ("FindBootPartition: result = %1", result);
+
+	list<string> readlinkParts = nil;
+
+	readlinkParts = splitstring (result["stdout"]:"", "/");
+
+	y2milestone ("FindBootPartition: readlinkParts = %1", readlinkParts);
+
+	if (size (readlinkParts) < 1) {
+	    y2error ("FindBootPartition: readlinkParts size is unexpected %1", readlinkParts);
+
+	    fError = true;
+	}
+
+	string ccwDevice = readlinkParts[size (readlinkParts) - 1]:"";
+
+	if (!fError) {
+	    uParts = [ "ccw", ccwDevice];
+	}
+
+    } else if (substring (fullDisk, 0, 2) == "sd") {
+
+	// Handle sdb or sdb4
+	string disk = nil;
+
+	// /dev/sda
+	if (size (fullDisk) == 3) {
+	    disk = fullDisk;
+	}
+	else if (size (fullDisk) == 4) {
+	    disk = substring (fullDisk, 0, 3); 
+	}
+	else {
+	    fError = true;
+	}
+
+	y2milestone ("FindBootPartition: found that the MBR uses SCSI (%1)", disk);
+
+	string deviceDirectory = FindSysfsRoot () + "/block/" + disk + "/device/";
+
+	// bash-3.1# cat /sys/block/sda/device/hba_id
+	// 0.0.1734
+	string hbaId = (string)SCR::Read (.target.string, deviceDirectory + "hba_id");
+
+	// bash-3.1# cat /sys/block/sda/device/wwpn
+	// 0x500507630300c562
+	string wwpn = (string)SCR::Read (.target.string, deviceDirectory + "wwpn");
+
+	// bash-3.1# cat /sys/block/sda/device/fcp_lun
+	// 0x401040eb00000000
+	string fcpLun = (string)SCR::Read (.target.string, deviceDirectory + "fcp_lun");
+
+	y2milestone ("FindBootPartition: hbaId  = %1", hbaId);
+	y2milestone ("FindBootPartition: wwpn   = %1", wwpn);
+	y2milestone ("FindBootPartition: fcpLun = %1", fcpLun);
+
+	hbaId  = deletechars (hbaId, "\n\r");
+	wwpn   = deletechars (wwpn, "\n\r");
+	fcpLun = deletechars (fcpLun, "\n\r");
+
+	if (hbaId == nil || size (hbaId) == 0) {
+	    y2error ("FindBootPartition: hbaId is empty!");
+	    fError = true;
+	}
+	if (wwpn == nil || size (wwpn) == 0) {
+	    y2error ("FindBootPartition: wwpn is empty!");
+	    fError = true;
+	}
+	if (fcpLun == nil || size (fcpLun) == 0) {
+	    y2error ("FindBootPartition: fcpLun is empty!");
+	    fError = true;
+	}
+
+	if (!fError) {
+	    uParts = [ "zfcp", hbaId, wwpn, fcpLun ];
+	}
+
+    } else {
+
+	y2error ("FindBootPartition: Unexpected format \"%1\"", fullDisk);
+
+    }
+
+    y2milestone ("FindBootPartition: returning uParts = %1", uParts);
+
+    return uParts;
+}
+
+/**
+ * Modifys the reipl configuration passed in with what it should be for the detected
+ * boot partition.
+ * @param configuration the current configuration.
+ * @return a map of the new configuration.
+ */
+global map <string, any> ModifyReiplWithBootPartition (map <string, any> configuration) {
+    list<string> uParts = FindBootPartition ();
+
+    if (uParts == nil) {
+	y2error ("ModifyReiplWithBootPartition: uParts is nil");
+    }
+
+    boolean fCCW = false;
+    boolean fFCP = false;
+
+    if (size (uParts) == 2) {
+	if (uParts[0]:"" == "ccw") {
+	    if (ccw_exists) {
+		fCCW = true;
+	    }
+	    else {
+		y2error ("ModifyReiplWithBootPartition: udevPath uses ccw but ccw is not implemented!");
+	    }
+	}
+	else {
+	    y2error ("ModifyReiplWithBootPartition: size of uParts is 2, but first word is not ccw!");
+	}
+    }
+    else if (size (uParts) == 4) {
+	if (uParts[0]:"" == "zfcp") {
+	    if (fcp_exists) {
+		fFCP = true;
+	    }
+	    else {
+		y2error ("ModifyReiplWithBootPartition: udevPath uses fcp but fcp is not implemented!");
+	    }
+	}
+	else {
+	    y2error ("ModifyReiplWithBootPartition: size of uParts is 4, but format is not what we expect");
+	}
+    }
+    else {
+	y2error ("ModifyReiplWithBootPartition: size of uParts is not 2 or 4");
+    }
+
+    if (fCCW) {
+	map ccw_map = (map)configuration["ccw"]:nil;
+
+	if (ccw_map == nil) {
+	    y2error ("ModifyReiplWithBootPartition: ccw does not exist in configuration");
+
+	    configuration = nil;
+	}
+	else {
+	    ccw_map["device"]   = uParts[1]:"";
+	    ccw_map["loadparm"] = "";
+
+	    configuration["ccw"] = ccw_map; 
+	}
+    }
+    else if (fFCP) {
+	map fcp_map = (map)configuration["fcp"]:nil;
+
+	if (fcp_map == nil) {
+	    y2error ("ModifyReiplWithBootPartition: ccw does not exist in configuration");
+
+	    configuration = nil;
+	}
+	else {
+	    fcp_map["device"]   = uParts[1]:"";
+	    fcp_map["wwpn"]     = uParts[2]:"";
+	    fcp_map["lun"]      = uParts[3]:"";
+	    fcp_map["bootprog"] = "";
+	    fcp_map["br_lba"]   = "";
+
+	    configuration["fcp"] = fcp_map;
+	}
+    }
+    else {
+	y2error ("ModifyReiplWithBootPartition: Should not be here!");
+
+	configuration = nil;
+    }
+
+    return configuration;
+}
+
+/**
+ * Read all reipl settings
+ * @return map<string, any> of settings 
+ */
+global map <string, any> ReadState () {
+    map <string, any> configuration = $[];
+
+    if (!SanityCheck ()) {
+	y2error ("Reipl::Read: SanityCheck failed!");
+
+	Popup::Error (_("This machine does not support reipl!"));
+
+	return nil;
+    }
+
+    if (ccw_exists) {
+	if (configuration["ccw"]:nil == nil) {
+	    configuration["ccw"] = $[
+		"device":   "",
+		"loadparm": ""
+	    ];
+	}
+
+	map ccw_map = (map)configuration["ccw"]:nil;
+
+	ccw_map["device"] = deletechars ((string)SCR::Read (.target.string, ccw_directory + "/device"), "\n\r");
+	ccw_map["loadparm"] = deletechars ((string)SCR::Read (.target.string, ccw_directory + "/loadparm"), "\n\r");
+
+	configuration["ccw"] = ccw_map;
+    }
+    else {
+	y2error ("Reipl::Read: ccw is not configured.");
+
+	configuration["ccw"] = nil;
+    }
+
+    if (fcp_exists) {
+	if (configuration["fcp"]:nil == nil) {
+	    configuration["fcp"] = $[
+		"device":	"",
+		"wwpn":		"",
+		"lun":		"",
+		"bootprog":	"",
+		"br_lba":	""
+	    ];
+	}
+
+	map fcp_map = (map)configuration["fcp"]:nil;
+
+	fcp_map["device"]   = deletechars ((string)SCR::Read (.target.string, fcp_directory + "/device"), "\n\r");
+	fcp_map["wwpn"]     = deletechars ((string)SCR::Read (.target.string, fcp_directory + "/wwpn"), "\n\r");
+	fcp_map["lun"]      = deletechars ((string)SCR::Read (.target.string, fcp_directory + "/lun"), "\n\r");
+	fcp_map["bootprog"] = deletechars ((string)SCR::Read (.target.string, fcp_directory + "/bootprog"), "\n\r");
+	fcp_map["br_lba"]   = deletechars ((string)SCR::Read (.target.string, fcp_directory + "/br_lba"), "\n\r");
+
+	configuration["fcp"] = fcp_map;
+    }
+    else {
+	configuration["fcp"] = nil;
+    }
+
+    configuration["method"] = deletechars ((string)SCR::Read (.target.string, reipl_directory + "/reipl_type"), "\n\r");
+
+    return configuration;
+}
+
+/**
+ * Read all reipl settings
+ * @return true on success
+ */
+global boolean Read () {
+
+    map <string, any> configuration = ReadState ();
+
+    if (configuration != nil) {
+	reipl_configuration = configuration;
+    }
+
+    if(Abort()) return false;
+    modified = false;
+    return true;
+}
+
+/**
+ * Write all reipl setting to the firmware
+ * @param configuration the current configuration.
+ * @return true on success
+ */
+global boolean WriteState (map <string, any> configuration) {
+    boolean rc = true;
+
+    if (configuration["method"]:nil != nil) {
+	y2milestone ("Reipl::WriteState: writing out method %1", configuration["method"]:"");
+
+	SCR::Write (.target.string, reipl_directory + "/reipl_type", (string)configuration["method"]:nil);
+    }
+
+    if (ccw_exists) {
+	map    result  = nil;
+	string echoCmd = nil;
+
+	y2milestone ("Reipl::WriteState: writing out ccw configuration.");
+
+	map ccw_map = (map)configuration["ccw"]:nil;
+
+	if (ccw_map != nil) {
+	    y2milestone ("Reipl::WriteState: ccw_map device is now \"%1\"", ccw_map["device"]:"???");
+	    y2milestone ("Reipl::WriteState: ccw_map loadparm is now \"%1\"", ccw_map["loadparm"]:"???");
+
+	    // NOTE: It should be this, but you cannot write an empty ("") string out!
+//	    rc = SCR::Write (.target.string, ccw_directory + "/device", (string)ccw_map["device"]:nil);
+//	    rc = SCR::Write (.target.string, ccw_directory + "/loadparm", (string)ccw_map["loadparm"]:nil);
+
+	    echoCmd = "echo \"" + (string)ccw_map["device"]:nil + "\" > " + ccw_directory + "/device";
+	    result = (map)SCR::Execute (.target.bash_output, echoCmd);
+	    if (result["exit"]:-1 != 0) {
+		y2error ("Error: Writing ccw device returns %1", result["stderr"]:"");
+
+		rc = false;
+	    }
+
+	    echoCmd = "echo \"" + (string)ccw_map["loadparm"]:nil + "\" > " + ccw_directory + "/loadparm"; 
+	    result = (map)SCR::Execute (.target.bash_output, echoCmd);
+	    if (result["exit"]:-1 != 0) {
+		y2error ("Error: Writing ccw loadparm returns %1", result["stderr"]:"");
+
+		rc = false;
+	    }
+	}
+	else {
+	    y2error ("Reipl::WriteState: ccw_map is nil!");
+
+	    rc = false;
+	}
+    }
+
+    if (fcp_exists) {
+	map    result  = nil;
+	string echoCmd = nil;
+
+	y2milestone ("Reipl::WriteState: writing out fcp configuration.");
+
+	map fcp_map = (map)configuration["fcp"]:nil;
+
+	if (fcp_map != nil) {
+	    y2milestone ("Reipl::WriteState: fcp_map device is now \"%1\"", fcp_map["device"]:"???");
+	    y2milestone ("Reipl::WriteState: fcp_map wwpn is now \"%1\"", fcp_map["wwpn"]:"???");
+	    y2milestone ("Reipl::WriteState: fcp_map lun is now \"%1\"", fcp_map["lun"]:"???");
+	    y2milestone ("Reipl::WriteState: fcp_map bootprog is now \"%1\"", fcp_map["bootprog"]:"???");
+	    y2milestone ("Reipl::WriteState: fcp_map br_lba is now \"%1\"", fcp_map["br_lba"]:"???");
+
+	    echoCmd = "echo \"" + (string)fcp_map["device"]:nil + "\" > " + fcp_directory + "/device";
+	    result = (map)SCR::Execute (.target.bash_output, echoCmd);
+	    if (result["exit"]:-1 != 0) {
+		y2error ("Error: Writing fcp device returns %1", result["stderr"]:"");
+
+		rc = false;
+	    }
+
+	    echoCmd = "echo \"" + (string)fcp_map["wwpn"]:nil + "\" > " + fcp_directory + "/wwpn";
+	    result = (map)SCR::Execute (.target.bash_output, echoCmd);
+	    if (result["exit"]:-1 != 0) {
+		y2error ("Error: Writing fcp wwpn returns %1", result["stderr"]:"");
+
+		rc = false;
+	    }
+
+	    echoCmd = "echo \"" + (string)fcp_map["lun"]:nil + "\" > " + fcp_directory + "/lun";
+	    result = (map)SCR::Execute (.target.bash_output, echoCmd);
+	    if (result["exit"]:-1 != 0) {
+		y2error ("Error: Writing fcp lun returns %1", result["stderr"]:"");
+
+		rc = false;
+	    }
+
+	    echoCmd = "echo \"" + (string)fcp_map["bootprog"]:nil + "\" > " + fcp_directory + "/bootprog";
+	    result = (map)SCR::Execute (.target.bash_output, echoCmd);
+	    if (result["exit"]:-1 != 0) {
+		y2error ("Error: Writing fcp bootprog returns %1", result["stderr"]:"");
+
+		rc = false;
+	    }
+
+	    echoCmd = "echo \"" + (string)fcp_map["br_lba"]:nil + "\" > " + fcp_directory + "/br_lba";
+	    result = (map)SCR::Execute (.target.bash_output, echoCmd);
+	    if (result["exit"]:-1 != 0) {
+		y2error ("Error: Writing fcp br_lba returns %1", result["stderr"]:"");
+
+		rc = false;
+	    }
+	}
+	else {
+	    y2error ("Reipl::Write: fcp_map is nil!");
+
+	    rc = false;
+	}
+    }
+
+    return rc;
+}
+
+/**
+ * Write all reipl settings
+ * @return true on success
+ */
+global boolean Write () {
+
+    boolean rc = WriteState (reipl_configuration);
+
+    if (Abort())
+	return false;
+
+    return rc;
+}
+
+/**
+ * Get all reipl settings from the first parameter
+ * (For use by autoinstallation.)
+ * @param settings The YCP structure to be imported.
+ * @return boolean True on success
+ */
+global boolean Import (map settings) {
+    map <string, any> imported = $[];
+
+    if (settings["ccw"]:nil != nil) {
+	map ccwIn  = (map)settings["ccw"]:$[];
+	map ccwOut = $[
+	    "device": "",
+	    "loadparm": ""
+	];
+
+	if (ccwIn["device"]:nil != nil) {
+	    ccwOut["device"] = ccwIn["device"]:nil;
+	}
+	if (ccwIn["loadparm"]:nil != nil) {
+	    ccwOut["loadparm"] = ccwIn["loadparm"]:nil;
+	}
+
+	imported["ccw"] = ccwOut;
+    }
+
+    if (settings["fcp"]:nil != nil) {
+	map fcpIn  = (map)settings["fcp"]:$[];
+	map fcpOut = $[
+		"device":	"",
+		"wwpn":		"",
+		"lun":		"",
+		"bootprog":	"",
+		"br_lba":	""
+	];
+
+	if (fcpIn["device"]:nil != nil) {
+	    fcpOut["device"] = fcpIn["device"]:nil;
+	}
+	if (fcpIn["wwpn"]:nil != nil) {
+	    fcpOut["wwpn"] = fcpIn["wwpn"]:nil;
+	}
+	if (fcpIn["lun"]:nil != nil) {
+	    fcpOut["lun"] = fcpIn["lun"]:nil;
+	}
+	if (fcpIn["bootprog"]:nil != nil) {
+	    fcpOut["bootprog"] = fcpIn["bootprog"]:nil;
+	}
+	if (fcpIn["br_lba"]:nil != nil) {
+	    fcpOut["br_lba"] = fcpIn["br_lba"]:nil;
+	}
+
+	imported["fcp"] = fcpOut;
+    }
+
+    reipl_configuration = imported;
+
+    return true;
+}
+
+/**
+ * Dump the reipl settings to a single map
+ * (For use by autoinstallation.)
+ * @return map Dumped settings (later acceptable by Import ())
+ */
+global map Export () {
+    return reipl_configuration;
+}
+
+/**
+ * Create a textual summary and a list of unconfigured cards
+ * @return summary of the current configuration
+ */
+global list Summary () {
+    string summary = "";
+    string status  = nil;
+    map    found   = nil;
+
+    summary = Summary::AddHeader (summary, _("Configured reipl methods"));
+
+    summary = Summary::OpenList (summary);
+
+    found = (map)reipl_configuration["ccw"]:nil;
+    if (found != nil) {
+	if (reipl_configuration["method"]:nil == "ccw") {
+	    status = _("The method ccw is configured and being used.");
+	} else {
+	    status = _("The method ccw is configured.");
+	}
+    } else {
+	status = _("The method ccw is not supported.");
+    }
+
+    summary = Summary::AddListItem (summary, status);
+
+    found = (map)reipl_configuration["fcp"]:nil;
+    if (found != nil) {
+	if (reipl_configuration["method"]:nil == "fcp") {
+	    status = _("The method fcp is configured and being used.");
+	} else {
+	    status = _("The method fcp is configured.");
+	}
+    } else {
+	status = _("The method fcp is not supported.");
+    }
+
+    summary = Summary::AddListItem (summary, status);
+
+    summary = Summary::CloseList (summary);
+
+    return [summary, []];
+}
+
+/**
+ * Return packages needed to be installed and removed during
+ * Autoinstallation to insure module has all needed software
+ * installed.
+ * @return map with 2 lists.
+ */
+global map AutoPackages () {
+    return $[ "install":[], "remove":[] ];
+}
+
+/* EOF */
+}
