@@ -1,5 +1,5 @@
 /** 
- * File:	reipl_finish.ycp
+ * File:	reipl_bootloader_finish.ycp
  * 
  * Module:	reIPL
  * 
@@ -10,13 +10,18 @@
  * 
  */
 {
-    // YaST finish client returns (boolean) whether configuration
-    // has been changed (true/false)
+    // YaST finish client returns (map) $[
+    //     "different" : (boolean) whether changed,
+    //     "ipl_msg"   : (string) localized message,
+    // ]
 
     import "Arch";
     import "Reipl";
 
+    textdomain "reipl";
+
     boolean different = false;
+    string ipl_msg = "";
 
     // Other architectures do not support it
     if (Arch::s390 ()) {
@@ -31,7 +36,7 @@
 	    map oldFcpMap = (map)oldConfiguration["fcp"]:nil;
 	    map newFcpMap = (map)newConfiguration["fcp"]:nil;
 
-	    different = oldConfiguration["method"]:"a" != newConfiguration["method"]:"b"
+	    different =  oldConfiguration["method"]:"a" != newConfiguration["method"]:"b"
 			    && oldCcwMap["device"]:"a" != newCcwMap["device"]:"b"
 			    && oldCcwMap["loadparm"]:"a" != newCcwMap["loadparm"]:"b"
 			    && oldFcpMap["device"]:"a" != newFcpMap["device"]:"b"
@@ -39,10 +44,26 @@
 			    && oldFcpMap["lun"]:"a" != newFcpMap["lun"]:"b"
 			    && oldFcpMap["bootprog"]:"a" != newFcpMap["bootprog"]:"b"
 			    && oldFcpMap["br_lba"]:"a" != newFcpMap["br_lba"]:"b";
-	}
 
-	y2milestone ("Configuration (reIPL) has been changed: %1", different);
+	    if (newConfiguration["method"]:"ERROR" == "ccw") {
+		string dev = substring (newCcwMap["device"]:"", 4, 4);
+
+		ipl_msg = sformat (_("After shutdown, reload the system
+with an IPL from DASD '%1'.
+"), dev);
+
+	    } else if (newConfiguration["method"]:"ERROR" == "fcp") {
+		string dev  = substring (newFcpMap["device"]:"",  4, 4);
+		string wwpn = newFcpMap["wwpn"]:"";
+		string lun  = newFcpMap["lun"]:"";
+
+		ipl_msg = sformat (_("After shutdown, reload the system
+with an IPL from FCP '%1' with WWPN '%2'
+and LUN '%3'.
+"), dev, wwpn, lun);
+	    }
+	}
     }
 
-    return different;
+    return $["different":different, "ipl_msg":ipl_msg];
 }

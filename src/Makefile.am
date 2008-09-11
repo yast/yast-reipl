@@ -7,7 +7,9 @@ client_DATA =			\
 	reipl_auto.ycp		\
 	reipl_proposal.ycp	\
 	inst_reipl.ycp		\
-	inst_reiplauto.ycp
+	inst_reiplauto.ycp	\
+	reipl_finish.ycp	\
+	reipl_bootloader_finish.ycp
 
 ynclude_DATA =			\
 	helps.ycp		\
