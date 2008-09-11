@@ -3,7 +3,6 @@ Thu Sep 11 13:18:49 CEST 2008 - locilka@suse.cz
 
 - Added reipl_finish to be called from installation.
 - Added reipl_bootloader_finish to be called from bootloader.
-- 0.0.3
 
 -------------------------------------------------------------------
 Thu Sep 11 13:18:34 CEST 2008 - uli@suse.de
