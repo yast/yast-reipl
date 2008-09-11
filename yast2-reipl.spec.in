@@ -1,0 +1,50 @@
+@HEADER-COMMENT@
+
+
+@HEADER@
+BuildRequires:  docbook-xsl-stylesheets doxygen libxslt perl-XML-Writer sgml-skel update-desktop-files yast2-devtools yast2-testsuite
+
+Requires: yast2
+
+PreReq:		%fillup_prereq
+
+BuildArchitectures: noarch
+
+Summary:	Installation workflow
+
+%package devel-doc
+Group:          System/YaST
+Requires:	yast2-installation >= 2.15.34
+
+PreReq:		%fillup_prereq
+
+Summary:	reIPL
+
+%description
+-
+
+@PREP@
+
+@BUILD@
+
+@INSTALL@
+
+@CLEAN@
+
+%pre
+
+%post
+%{fillup_only -ns security checksig}
+
+%files
+%defattr(-,root,root)
+@clientdir@/*.ycp
+@moduledir@/*.ycp
+@moduledir@/*.ybc
+@desktopdir@/*.desktop
+%dir @yncludedir@/reipl
+@yncludedir@/reipl/*
+
+%dir @docdir@
+@docdir@/COPYING
+%readme @docdir@/README
