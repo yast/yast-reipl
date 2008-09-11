@@ -48,6 +48,9 @@
 	    if (newConfiguration["method"]:"ERROR" == "ccw") {
 		string dev = substring (newCcwMap["device"]:"", 4, 4);
 
+		// TRANSLATORS: part of a shutdown message
+		// %1 is replaced with a device name
+		// Newline at the end is required
 		ipl_msg = sformat (_("After shutdown, reload the system
 with an IPL from DASD '%1'.
 "), dev);
@@ -57,6 +60,11 @@ with an IPL from DASD '%1'.
 		string wwpn = newFcpMap["wwpn"]:"";
 		string lun  = newFcpMap["lun"]:"";
 
+		// TRANSLATORS: part of a shutdown message
+		// %1 is replaced with a FCP name
+		// %2 is replaced with a WWPN name
+		// %3 is replaced with a LUN name
+		// Newline at the end is required
 		ipl_msg = sformat (_("After shutdown, reload the system
 with an IPL from FCP '%1' with WWPN '%2'
 and LUN '%3'.
