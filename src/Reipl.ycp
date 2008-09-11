@@ -24,7 +24,7 @@
  * Summary:	Reipl settings, input and output functions
  * Authors:	Mark Hamzy <hamzy@us.ibm.com>
  *
- * $Id: Reipl.ycp 27914 2006-02-13 14:32:08Z locilka $
+ * $Id$
  *
  * Representation of the configuration of reipl.
  * Input and output routines.

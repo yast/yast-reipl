@@ -24,7 +24,7 @@
  * Summary:	Proposal function dispatcher.
  * Authors:	Mark Hamzy <hamzy@us.ibm.com>
  *
- * $Id: reipl_proposal.ycp 27914 2006-02-13 14:32:08Z locilka $
+ * $Id$
  *
  * Proposal function dispatcher for reipl configuration.
  * See source/installation/proposal/proposal-API.txt

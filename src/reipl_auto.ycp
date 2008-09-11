@@ -24,7 +24,7 @@
  * Summary:	Client for autoinstallation
  * Authors:	Mark Hamzy <hamzy@us.ibm.com>
  *
- * $Id: reipl_auto.ycp 27914 2006-02-13 14:32:08Z locilka $
+ * $Id$
  *
  * This is a client for autoinstallation. It takes its arguments,
  * goes through the configuration and return the setting.
