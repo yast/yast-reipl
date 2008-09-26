@@ -4,6 +4,7 @@ Thu Sep 11 13:18:49 CEST 2008 - locilka@suse.cz
 - Added reipl_finish to be called from installation.
 - Added reipl_bootloader_finish to be called from bootloader.
 - Fixed help texts - one gettext message for one <p>...</p>.
+- 2.17.0
 
 -------------------------------------------------------------------
 Thu Sep 11 13:18:34 CEST 2008 - uli@suse.de
