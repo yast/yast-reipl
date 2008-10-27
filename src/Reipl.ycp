@@ -246,7 +246,7 @@ global list<string> FindBootPartition () {
 	// bash-3.1# readlink -m /sys/block/dasda/device
 	// /sys/devices/css0/0.0.0006/0.0.4dcf
 	command = "/usr/bin/readlink -n -m " + FindSysfsRoot () + "/block/" + disk + "/device";
-
+	y2milestone ("Executing %1", command);
 	result = (map)SCR::Execute (.target.bash_output, command);
 
 	if (result["exit"]:-1 != 0) {
@@ -547,6 +547,7 @@ global boolean WriteState (map <string, any> configuration) {
 //	    rc = SCR::Write (.target.string, ccw_directory + "/loadparm", (string)ccw_map["loadparm"]:nil);
 
 	    echoCmd = "echo \"" + (string)ccw_map["device"]:nil + "\" > " + ccw_directory + "/device";
+	    y2milestone ("Executing %1", echoCmd);
 	    result = (map)SCR::Execute (.target.bash_output, echoCmd);
 	    if (result["exit"]:-1 != 0) {
 		y2error ("Error: Writing ccw device returns %1", result["stderr"]:"");
@@ -555,6 +556,7 @@ global boolean WriteState (map <string, any> configuration) {
 	    }
 
 	    echoCmd = "echo \"" + (string)ccw_map["loadparm"]:nil + "\" > " + ccw_directory + "/loadparm"; 
+	    y2milestone ("Executing %1", echoCmd);
 	    result = (map)SCR::Execute (.target.bash_output, echoCmd);
 	    if (result["exit"]:-1 != 0) {
 		y2error ("Error: Writing ccw loadparm returns %1", result["stderr"]:"");
@@ -585,6 +587,7 @@ global boolean WriteState (map <string, any> configuration) {
 	    y2milestone ("Reipl::WriteState: fcp_map br_lba is now \"%1\"", fcp_map["br_lba"]:"???");
 
 	    echoCmd = "echo \"" + (string)fcp_map["device"]:nil + "\" > " + fcp_directory + "/device";
+	    y2milestone ("Executing %1", echoCmd);
 	    result = (map)SCR::Execute (.target.bash_output, echoCmd);
 	    if (result["exit"]:-1 != 0) {
 		y2error ("Error: Writing fcp device returns %1", result["stderr"]:"");
@@ -593,6 +596,7 @@ global boolean WriteState (map <string, any> configuration) {
 	    }
 
 	    echoCmd = "echo \"" + (string)fcp_map["wwpn"]:nil + "\" > " + fcp_directory + "/wwpn";
+	    y2milestone ("Executing %1", echoCmd);
 	    result = (map)SCR::Execute (.target.bash_output, echoCmd);
 	    if (result["exit"]:-1 != 0) {
 		y2error ("Error: Writing fcp wwpn returns %1", result["stderr"]:"");
@@ -601,6 +605,7 @@ global boolean WriteState (map <string, any> configuration) {
 	    }
 
 	    echoCmd = "echo \"" + (string)fcp_map["lun"]:nil + "\" > " + fcp_directory + "/lun";
+	    y2milestone ("Executing %1", echoCmd);
 	    result = (map)SCR::Execute (.target.bash_output, echoCmd);
 	    if (result["exit"]:-1 != 0) {
 		y2error ("Error: Writing fcp lun returns %1", result["stderr"]:"");
@@ -609,6 +614,7 @@ global boolean WriteState (map <string, any> configuration) {
 	    }
 
 	    echoCmd = "echo \"" + (string)fcp_map["bootprog"]:nil + "\" > " + fcp_directory + "/bootprog";
+	    y2milestone ("Executing %1", echoCmd);
 	    result = (map)SCR::Execute (.target.bash_output, echoCmd);
 	    if (result["exit"]:-1 != 0) {
 		y2error ("Error: Writing fcp bootprog returns %1", result["stderr"]:"");
@@ -617,6 +623,7 @@ global boolean WriteState (map <string, any> configuration) {
 	    }
 
 	    echoCmd = "echo \"" + (string)fcp_map["br_lba"]:nil + "\" > " + fcp_directory + "/br_lba";
+	    y2milestone ("Executing %1", echoCmd);
 	    result = (map)SCR::Execute (.target.bash_output, echoCmd);
 	    if (result["exit"]:-1 != 0) {
 		y2error ("Error: Writing fcp br_lba returns %1", result["stderr"]:"");
