@@ -43,7 +43,6 @@ import "FileUtils";
 import "Confirm";
 import "Popup";
 import "Storage";
-import "BootCommon";
 
 /**
  * Has the user modified the dialog values?
@@ -229,11 +228,17 @@ global list<string> FindBootPartition () {
     string       command = nil;
     map          result  = nil;
 
+    map mp = Storage::GetMountPoints();
+
+    list mountdata_boot = mp["/boot"]:(mp["/"]:[]);
+    y2milestone( "mountdata_boot %1", mountdata_boot );
+    string boot_device = mountdata_boot[0]:"";
+
     // Examples: /dev/dasda2 or /dev/sda3
-    y2milestone ("FindBootPartition: BootPartitionDevice = %1", BootCommon::BootPartitionDevice);
+    y2milestone ("FindBootPartition: BootPartitionDevice = %1", boot_device);
 
     // Examples: dasda2 or sda3
-    string fullDisk = substring (BootCommon::BootPartitionDevice, 5);
+    string fullDisk = substring (boot_device, 5);
 
     y2milestone ("FindBootPartition: fullDisk = %1", fullDisk);
 
