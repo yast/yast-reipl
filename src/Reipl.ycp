@@ -111,7 +111,7 @@ global string FindSysfsRoot () {
     mounts = (list<map>)SCR::Read (.etc.mtab);
 
     foreach (map mount, mounts, ``{
-	y2milestone ("FindSysfsRoot: mount = %1", mount);
+	y2debug ("FindSysfsRoot: mount = %1", mount);
 
 	if (ret == nil && mount["vfstype"]:"ERROR" == "sysfs" && mount["spec"]:"ERROR" == "sysfs") {
 	    ret = (string)mount["file"]:nil;
@@ -244,7 +244,19 @@ global list<string> FindBootPartition () {
 
     if (substring (fullDisk, 0, 4) == "dasd") {
 
-	string disk = substring (fullDisk, 0, 5);
+	string disk = substring (fullDisk, 0, 5); /* broken with more than 26 DASD devices */
+        /*
+          fullDisk contains a device name either starting with "dasd" or with "sd".
+          I suppose it might be a full block device or just a partition on such a
+          block device. If it is a partition we have to get rid of the suffix
+          specifying the partition in order to get the containing block device.
+          We need something regex-like to get rid of the suffix.
+          This would work even if we have thousands
+          of block devices, which is not uncommon on s390. In such a case the
+          devices would have names such as "dasdaab" or "dasdaab1" and taking the
+          first five characters would no longer work. Analogous thing applies for
+          SCSI devices in the FCP case.
+         */
 
 	y2milestone ("FindBootPartition: found that the MBR uses dasd (%1)", disk);
 
@@ -292,7 +304,7 @@ global list<string> FindBootPartition () {
 	    disk = fullDisk;
 	}
 	else if (size (fullDisk) == 4) {
-	    disk = substring (fullDisk, 0, 3); 
+	    disk = substring (fullDisk, 0, 3); /* broken with more than 26 SCSI disk devices */
 	}
 	else {
 	    fError = true;
@@ -397,6 +409,7 @@ global map <string, any> ModifyReiplWithBootPartition (map <string, any> configu
     }
 
     if (fCCW) {
+        configuration["method"] = "ccw";
 	map ccw_map = (map)configuration["ccw"]:nil;
 
 	if (ccw_map == nil) {
@@ -412,6 +425,7 @@ global map <string, any> ModifyReiplWithBootPartition (map <string, any> configu
 	}
     }
     else if (fFCP) {
+        configuration["method"] = "fcp";
 	map fcp_map = (map)configuration["fcp"]:nil;
 
 	if (fcp_map == nil) {
@@ -448,7 +462,10 @@ global map <string, any> ReadState () {
     if (!SanityCheck ()) {
 	y2error ("Reipl::Read: SanityCheck failed!");
 
-	Popup::Error (_("This machine does not support reipl!"));
+	/* Popup::Error (_("This machine does not support reipl!")); */
+        /* Don't bother the user, just silently do shutdown in the end.
+           Especially, since this would currently popup three times
+           during installation. */
 
 	return nil;
     }
@@ -533,6 +550,11 @@ global boolean WriteState (map <string, any> configuration) {
 	y2milestone ("Reipl::WriteState: writing out method %1", configuration["method"]:"");
 
 	SCR::Write (.target.string, reipl_directory + "/reipl_type", (string)configuration["method"]:nil);
+        /*
+          I see a difference between the value written to the log and written to sysfs:
+          configuration["method"]:"" <===> (string)configuration["method"]:nil
+          But that's probably OK here and not the reason for the obvious bug in the y2log.
+        */
     }
 
     if (ccw_exists) {
