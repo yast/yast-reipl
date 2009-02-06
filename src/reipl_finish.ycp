@@ -24,7 +24,7 @@
 	map <string, any> newConfiguration = oldConfiguration;
 
 	if (oldConfiguration != nil) {
-	    Reipl::ModifyReiplWithBootPartition (newConfiguration);
+	    newConfiguration = Reipl::ModifyReiplWithBootPartition (oldConfiguration);
 
 	    map oldCcwMap = (map)oldConfiguration["ccw"]:nil;
 	    map newCcwMap = (map)newConfiguration["ccw"]:nil;
