@@ -137,8 +137,7 @@ global map <string, any> reipl_configuration = $[];
 //	"method":	"ccw",
 //	"ccw":		$[
 //			"device":	"0.0.4711",
-//			"loadparm":	"",
-//			"parm": 	"" /* SLES 11 and z/VM only */
+//			"loadparm":	""
 //		],
 //	"fcp":		$[
 //			"device":	"0.0.4711",
@@ -185,7 +184,6 @@ global boolean SanityCheck () {
 			y2error ("Missing loadparm under %1", ccw_directory);
 			return false;
 		}
-                // don't check for "parm" since it might not be there under zLPAR
 	}
 
 	if (fcp_exists) {
@@ -365,13 +363,12 @@ global list<string> FindBootPartition () {
 }
 
 /**
- * Returns the reipl configuration passed in with what it should be for the detected
+ * Modifys the reipl configuration passed in with what it should be for the detected
  * boot partition.
- * @param configuration an old configuration.
- * @return a map of the new target configuration.
+ * @param configuration the current configuration.
+ * @return a map of the new configuration.
  */
 global map <string, any> ModifyReiplWithBootPartition (map <string, any> configuration) {
-    // get target information
     list<string> uParts = FindBootPartition ();
 
     if (uParts == nil) {
@@ -383,7 +380,12 @@ global map <string, any> ModifyReiplWithBootPartition (map <string, any> configu
 
     if (size (uParts) == 2) {
 	if (uParts[0]:"" == "ccw") {
+	    if (ccw_exists) {
 		fCCW = true;
+	    }
+	    else {
+		y2error ("ModifyReiplWithBootPartition: udevPath uses ccw but ccw is not implemented!");
+	    }
 	}
 	else {
 	    y2error ("ModifyReiplWithBootPartition: size of uParts is 2, but first word is not ccw!");
@@ -391,7 +393,12 @@ global map <string, any> ModifyReiplWithBootPartition (map <string, any> configu
     }
     else if (size (uParts) == 4) {
 	if (uParts[0]:"" == "zfcp") {
+	    if (fcp_exists) {
 		fFCP = true;
+	    }
+	    else {
+		y2error ("ModifyReiplWithBootPartition: udevPath uses fcp but fcp is not implemented!");
+	    }
 	}
 	else {
 	    y2error ("ModifyReiplWithBootPartition: size of uParts is 4, but format is not what we expect");
@@ -401,29 +408,45 @@ global map <string, any> ModifyReiplWithBootPartition (map <string, any> configu
 	y2error ("ModifyReiplWithBootPartition: size of uParts is not 2 or 4");
     }
 
-    // overwrite parts of configuration map with target values
     if (fCCW) {
         configuration["method"] = "ccw";
 	map ccw_map = (map)configuration["ccw"]:nil;
+
+	if (ccw_map == nil) {
+	    y2error ("ModifyReiplWithBootPartition: ccw does not exist in configuration");
+
+	    configuration = nil;
+	}
+	else {
 	    ccw_map["device"]   = uParts[1]:"";
 	    ccw_map["loadparm"] = "";
-	    //ccw_map["parm"] = ""; /* SLES 11 and z/VM only */ // read only
+
 	    configuration["ccw"] = ccw_map; 
-        y2milestone ("ModifyReiplWithBootPartition: modified ccw map");
+	}
     }
     else if (fFCP) {
         configuration["method"] = "fcp";
 	map fcp_map = (map)configuration["fcp"]:nil;
+
+	if (fcp_map == nil) {
+	    y2error ("ModifyReiplWithBootPartition: ccw does not exist in configuration");
+
+	    configuration = nil;
+	}
+	else {
 	    fcp_map["device"]   = uParts[1]:"";
 	    fcp_map["wwpn"]     = uParts[2]:"";
 	    fcp_map["lun"]      = uParts[3]:"";
-	    fcp_map["bootprog"] = "0";
-	    fcp_map["br_lba"]   = "0";
+	    fcp_map["bootprog"] = "";
+	    fcp_map["br_lba"]   = "";
+
 	    configuration["fcp"] = fcp_map;
-        y2milestone ("ModifyReiplWithBootPartition: modified fcp map");
+	}
     }
     else {
-	y2error ("ModifyReiplWithBootPartition: Should not be here, configuration unmodified!");
+	y2error ("ModifyReiplWithBootPartition: Should not be here!");
+
+	configuration = nil;
     }
 
     return configuration;
@@ -435,44 +458,50 @@ global map <string, any> ModifyReiplWithBootPartition (map <string, any> configu
  */
 global map <string, any> ReadState () {
     map <string, any> configuration = $[];
-    configuration["ccw"] = $[
-	"device":   "",
-	"loadparm": "",
-	"parm":     "" /* SLES 11 and z/VM only */
-    ];
-    configuration["fcp"] = $[
-	"device":	"",
-	"wwpn":		"",
-	"lun":		"",
-	"bootprog":	"",
-	"br_lba":	""
-    ];
 
     if (!SanityCheck ()) {
 	y2error ("Reipl::Read: SanityCheck failed!");
 
-	// Popup::Error (_("This machine does not support reipl!"));
+	/* Popup::Error (_("This machine does not support reipl!")); */
         /* Don't bother the user, just silently do shutdown in the end.
            Especially, since this would currently popup three times
            during installation. */
 
-	return configuration;
+	return nil;
     }
 
     if (ccw_exists) {
+	if (configuration["ccw"]:nil == nil) {
+	    configuration["ccw"] = $[
+		"device":   "",
+		"loadparm": ""
+	    ];
+	}
+
 	map ccw_map = (map)configuration["ccw"]:nil;
 
 	ccw_map["device"] = deletechars ((string)SCR::Read (.target.string, ccw_directory + "/device"), "\n\r");
 	ccw_map["loadparm"] = deletechars ((string)SCR::Read (.target.string, ccw_directory + "/loadparm"), "\n\r");
-	ccw_map["parm"] = deletechars ((string)SCR::Read (.target.string, ccw_directory + "/parm"), "\n\r"); /* SLES 11 and z/VM only */
 
 	configuration["ccw"] = ccw_map;
     }
     else {
-	y2warning ("Reipl::Read: ccw is not configured.");
+	y2error ("Reipl::Read: ccw is not configured.");
+
+	configuration["ccw"] = nil;
     }
 
     if (fcp_exists) {
+	if (configuration["fcp"]:nil == nil) {
+	    configuration["fcp"] = $[
+		"device":	"",
+		"wwpn":		"",
+		"lun":		"",
+		"bootprog":	"",
+		"br_lba":	""
+	    ];
+	}
+
 	map fcp_map = (map)configuration["fcp"]:nil;
 
 	fcp_map["device"]   = deletechars ((string)SCR::Read (.target.string, fcp_directory + "/device"), "\n\r");
@@ -484,7 +513,7 @@ global map <string, any> ReadState () {
 	configuration["fcp"] = fcp_map;
     }
     else {
-	y2warning ("Reipl::Read: fcp is not configured.");
+	configuration["fcp"] = nil;
     }
 
     configuration["method"] = deletechars ((string)SCR::Read (.target.string, reipl_directory + "/reipl_type"), "\n\r");
@@ -521,6 +550,11 @@ global boolean WriteState (map <string, any> configuration) {
 	y2milestone ("Reipl::WriteState: writing out method %1", configuration["method"]:"");
 
 	SCR::Write (.target.string, reipl_directory + "/reipl_type", (string)configuration["method"]:nil);
+        /*
+          I see a difference between the value written to the log and written to sysfs:
+          configuration["method"]:"" <===> (string)configuration["method"]:nil
+          But that's probably OK here and not the reason for the obvious bug in the y2log.
+        */
     }
 
     if (ccw_exists) {
@@ -556,7 +590,6 @@ global boolean WriteState (map <string, any> configuration) {
 
 		rc = false;
 	    }
-
 	}
 	else {
 	    y2error ("Reipl::WriteState: ccw_map is nil!");
@@ -662,8 +695,7 @@ global boolean Import (map settings) {
 	map ccwIn  = (map)settings["ccw"]:$[];
 	map ccwOut = $[
 	    "device": "",
-	    "loadparm": "",
-	    "parm": "" /* SLES 11 and z/VM only */
+	    "loadparm": ""
 	];
 
 	if (ccwIn["device"]:nil != nil) {
@@ -671,10 +703,6 @@ global boolean Import (map settings) {
 	}
 	if (ccwIn["loadparm"]:nil != nil) {
 	    ccwOut["loadparm"] = ccwIn["loadparm"]:nil;
-	}
-        /* SLES 11 and z/VM only */
-	if (ccwIn["parm"]:nil != nil) {
-	    ccwOut["parm"] = ccwIn["parm"]:nil;
 	}
 
 	imported["ccw"] = ccwOut;

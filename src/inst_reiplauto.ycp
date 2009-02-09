@@ -65,13 +65,14 @@
 
     boolean rc = true;
 
-    map <string, any> configuration = Reipl::ReadState ();
+    map <string, any> oldConfiguration = Reipl::ReadState ();
+    map <string, any> newConfiguration = nil;
 
-    if (configuration != nil) {
-	configuration = Reipl::ModifyReiplWithBootPartition (configuration);
+    if (oldConfiguration != nil) {
+	newConfiguration = Reipl::ModifyReiplWithBootPartition (oldConfiguration);
 
-	if (configuration != nil) {
-	    Reipl::WriteState (configuration);
+	if (newConfiguration != nil) {
+	    Reipl::WriteState (newConfiguration);
 	}
 	else {
 	    y2error ("Could not modify reipl configuration");
