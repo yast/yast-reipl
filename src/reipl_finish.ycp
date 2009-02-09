@@ -16,29 +16,42 @@
     import "Arch";
     import "Reipl";
 
-    boolean different = false;
+    boolean different = true;
 
     // Other architectures do not support it
     if (Arch::s390 ()) {
 	map <string, any> oldConfiguration = Reipl::ReadState ();
-	map <string, any> newConfiguration = oldConfiguration;
+	map <string, any> newConfiguration = Reipl::ReadState ();
 
 	if (oldConfiguration != nil) {
-	    newConfiguration = Reipl::ModifyReiplWithBootPartition (oldConfiguration);
+	    newConfiguration = Reipl::ModifyReiplWithBootPartition (newConfiguration);
 
 	    map oldCcwMap = (map)oldConfiguration["ccw"]:nil;
 	    map newCcwMap = (map)newConfiguration["ccw"]:nil;
 	    map oldFcpMap = (map)oldConfiguration["fcp"]:nil;
 	    map newFcpMap = (map)newConfiguration["fcp"]:nil;
 
-	    different = oldConfiguration["method"]:"a" != newConfiguration["method"]:"b"
-			    && oldCcwMap["device"]:"a" != newCcwMap["device"]:"b"
-			    && oldCcwMap["loadparm"]:"a" != newCcwMap["loadparm"]:"b"
-			    && oldFcpMap["device"]:"a" != newFcpMap["device"]:"b"
-			    && oldFcpMap["wwpn"]:"a" != newFcpMap["wwpn"]:"b"
-			    && oldFcpMap["lun"]:"a" != newFcpMap["lun"]:"b"
-			    && oldFcpMap["bootprog"]:"a" != newFcpMap["bootprog"]:"b"
-			    && oldFcpMap["br_lba"]:"a" != newFcpMap["br_lba"]:"b";
+            different =    (oldConfiguration["method"]:"a" != newConfiguration["method"]:"b")
+                        || (oldCcwMap["device"]:"a" != newCcwMap["device"]:"b")
+                        || (oldCcwMap["loadparm"]:"a" != newCcwMap["loadparm"]:"b")
+                        || (oldCcwMap["parm"]:"a" != newCcwMap["parm"]:"b")
+                        || (oldFcpMap["device"]:"a" != newFcpMap["device"]:"b")
+                        || (oldFcpMap["wwpn"]:"a" != newFcpMap["wwpn"]:"b")
+                        || (oldFcpMap["lun"]:"a" != newFcpMap["lun"]:"b")
+                        || (oldFcpMap["bootprog"]:"a" != newFcpMap["bootprog"]:"b")
+                        || (oldFcpMap["br_lba"]:"a" != newFcpMap["br_lba"]:"b");
+
+            y2milestone("(oldConfiguration['method']:'a' != newConfiguration['method']:'b') = %1", (oldConfiguration["method"]:"a" != newConfiguration["method"]:"b"));
+            y2milestone("(oldCcwMap['device']:'a' != newCcwMap['device']:'b')               = %1", (oldCcwMap["device"]:"a" != newCcwMap["device"]:"b"));
+            y2milestone("(oldCcwMap['loadparm']:'a' != newCcwMap['loadparm']:'b')           = %1", (oldCcwMap["loadparm"]:"a" != newCcwMap["loadparm"]:"b"));
+            y2milestone("(oldCcwMap['parm']:'a' != newCcwMap['parm']:'b')                   = %1", (oldCcwMap["parm"]:"a" != newCcwMap["parm"]:"b"));
+            y2milestone("(oldFcpMap['device']:'a' != newFcpMap['device']:'b')               = %1", (oldFcpMap["device"]:"a" != newFcpMap["device"]:"b"));
+            y2milestone("(oldFcpMap['wwpn']:'a' != newFcpMap['wwpn']:'b')                   = %1", (oldFcpMap["wwpn"]:"a" != newFcpMap["wwpn"]:"b"));
+            y2milestone("(oldFcpMap['lun']:'a' != newFcpMap['lun']:'b')                     = %1", (oldFcpMap["lun"]:"a" != newFcpMap["lun"]:"b"));
+            y2milestone("(oldFcpMap['bootprog']:'a' != newFcpMap['bootprog']:'b')           = %1", (oldFcpMap["bootprog"]:"a" != newFcpMap["bootprog"]:"b"));
+            y2milestone("(oldFcpMap['br_lba']:'a' != newFcpMap['br_lba']:'b')               = %1", (oldFcpMap["br_lba"]:"a" != newFcpMap["br_lba"]:"b"));
+            y2milestone("different = %1", different);
+
 	}
 
 	y2milestone ("Configuration (reIPL) has been changed: %1", different);
