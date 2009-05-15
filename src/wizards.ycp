@@ -1,0 +1,143 @@
+/* ------------------------------------------------------------------------------
+ * Copyright (c) 2006 Novell, Inc. All Rights Reserved.
+ *
+ *
+ * This program is free software; you can redistribute it and/or modify it under
+ * the terms of version 2 of the GNU General Public License as published by the
+ * Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program; if not, contact Novell, Inc.
+ *
+ * To contact Novell about this file by physical or electronic mail, you may find
+ * current contact information at www.novell.com.
+ * ------------------------------------------------------------------------------
+ */
+
+/**
+ * File:	include/reipl/wizards.ycp
+ * Package:	Configuration of reipl
+ * Summary:	Wizards definitions
+ * Authors:	Mark Hamzy <hamzy@us.ibm.com>
+ *
+ * $Id$
+ */
+
+{
+
+textdomain "reipl";
+
+import "Sequencer";
+import "Wizard";
+
+include "reipl/complex.ycp";
+include "reipl/dialogs.ycp";
+
+/**
+ * Add a configuration of reipl
+ * @return sequence result
+ */
+any ConfigureSequence() {
+
+    map aliases = $[
+	"config"	: ``(ConfigureDialog())
+    ];
+
+    map sequence = $[
+	"ws_start" : "config",
+	"config" : $[
+	    `abort	: `abort,
+	    `next	: `next
+	],
+    ];
+
+    return Sequencer::Run(aliases, sequence);
+}
+
+/**
+ * Main workflow of the reipl configuration
+ * @return sequence result
+ */
+any MainSequence() {
+
+    map aliases = $[
+	"configure"	: [ ``( ConfigureSequence() ), true ]
+    ];
+
+    map sequence = $[
+	"ws_start" : "configure",
+	"configure" : $[
+	    `abort	: `abort,
+	    `next	: `next,
+	]
+    ];
+
+    any ret = Sequencer::Run(aliases, sequence);
+
+    return ret;
+}
+
+/**
+ * Whole configuration of reipl
+ * @return sequence result
+ */
+any ReiplSequence() {
+
+    map aliases = $[
+	"read"	: [ ``( ReadDialog() ), true ],
+	"main"	:   ``( MainSequence() ),
+	"write"	: [ ``( WriteDialog() ), true ]
+    ];
+
+    map sequence = $[
+	"ws_start" : "read",
+	"read" : $[
+	    `abort	: `abort,
+	    `next	: "main"
+	],
+	"main" : $[
+	    `abort	: `abort,
+	    `next	: "write"
+	],
+	"write" : $[
+	    `abort	: `abort,
+	    `next	: `next
+	]
+    ];
+
+    Wizard::CreateDialog();
+
+    any ret = Sequencer::Run(aliases, sequence);
+
+    UI::CloseDialog();
+    return ret;
+}
+
+/**
+ * Whole configuration of reipl but without reading and writing.
+ * For use with autoinstallation.
+ * @return sequence result
+ */
+any ReiplAutoSequence() {
+
+    /* Initialization dialog caption */
+    string caption = _("Reipl Configuration");
+    /* Initialization dialog contents */
+    term contents = `Label(_("Initializing..."));
+
+    Wizard::CreateDialog();
+    Wizard::SetContentsButtons(caption, contents, "",
+	    Label::BackButton(), Label::NextButton());
+
+    any ret = MainSequence();
+
+    UI::CloseDialog();
+    return ret;
+}
+
+/* EOF */
+}

@@ -1,0 +1,244 @@
+/* ------------------------------------------------------------------------------
+ * Copyright (c) 2006 Novell, Inc. All Rights Reserved.
+ *
+ *
+ * This program is free software; you can redistribute it and/or modify it under
+ * the terms of version 2 of the GNU General Public License as published by the
+ * Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program; if not, contact Novell, Inc.
+ *
+ * To contact Novell about this file by physical or electronic mail, you may find
+ * current contact information at www.novell.com.
+ * ------------------------------------------------------------------------------
+ */
+
+/**
+ * File:	include/reipl/dialogs.ycp
+ * Package:	Configuration of reipl
+ * Summary:	Dialogs definitions
+ * Authors:	Mark Hamzy <hamzy@us.ibm.com>
+ *
+ * $Id$
+ */
+
+{
+
+textdomain "reipl";
+
+import "Label";
+import "Wizard";
+import "Reipl";
+
+include "reipl/helps.ycp";
+
+/**
+ * Configure dialog
+ * @return dialog result
+ */
+any ConfigureDialog () {
+    map ccw_map = Reipl::reipl_configuration["ccw"]:$[
+	"device":	"",
+	"loadparm":	""
+];
+    map fcp_map = Reipl::reipl_configuration["fcp"]:$[
+	"device":       "",
+	"wwpn":         "",
+	"lun":          "",
+	"bootprog":     "",
+	"br_lba":       ""
+];
+
+    /* Reipl configure dialog caption */
+    string caption = _("Reipl Configuration");
+
+    /* Reipl configure dialog contents */
+    term method_contents = `Frame(
+				_("reipl methods"),
+				`VBox(
+					`VSpacing(0.2),
+					`RadioButtonGroup(
+						`id(`rbgroupmethods),
+						`VBox(
+							`Left(
+								`RadioButton(
+									`id(`useccw),
+									`opt (`notify),
+									_("&Ccw"),
+									Reipl::ccw_exists
+								)
+							),
+							`Left(
+								`RadioButton(
+									`id(`usefcp),
+									`opt (`notify),
+									_("&Fcp"),
+									Reipl::fcp_exists
+								)
+							),
+							`VSpacing(0.2)
+						)
+					)
+				)
+			);
+
+    term ccw_contents = `Frame(
+				`id(`ccw_frame),
+				_("ccw parameters"),
+				`VBox(
+					`VSpacing(0.2),
+					`TextEntry (
+						`id(`ccw_device),
+						_("&Device"),
+						ccw_map["device"]:""
+					),
+					`VSpacing(0.2),
+					`TextEntry (
+						`id(`ccw_loadparm),
+						_("&Loadparm"),
+						ccw_map["loadparm"]:""
+					),
+					`VSpacing(0.2)
+				)
+			);
+
+    term fcp_contents = `Frame(
+				`id(`fcp_frame),
+				_("fcp parameters"),
+				`VBox(
+					`VSpacing(0.2),
+					`TextEntry (
+						`id(`fcp_device),
+						_("D&evice"),
+						fcp_map["device"]:""
+					),
+					`VSpacing(0.2),
+					`TextEntry (
+						`id(`fcp_wwpn),
+						_("&World wide port number"),
+						fcp_map["wwpn"]:""
+					),
+					`VSpacing(0.2),
+					`TextEntry (
+						`id(`fcp_lun),
+						_("Lo&gical unit number"),
+						fcp_map["lun"]:""
+					),
+					`VSpacing(0.2),
+					`TextEntry (
+						`id(`fcp_bootprog),
+						_("B&oot program selector"),
+						fcp_map["bootprog"]:""
+					),
+					`VSpacing(0.2),
+					`TextEntry (
+						`id(`fcp_br_lba),
+						_("Boo&t record logical block address"),
+						fcp_map["br_lba"]:""
+					),
+					`VSpacing(0.2)
+				)
+			);
+
+    term contents = `HVSquash (
+			`VBox (
+				method_contents,
+				`VSpacing (1),
+				ccw_contents,
+				`VSpacing (1),
+				fcp_contents
+			)
+		    );
+
+    Wizard::SetContents(_("reipl configuration"),
+                              contents, HELPS["configure"]:_("help missing in helps.ycp"), true, true);
+
+    UI::ChangeWidget (`id(`ccw_frame), `Enabled, Reipl::ccw_exists);
+    UI::ChangeWidget (`id(`useccw), `Enabled, Reipl::ccw_exists);
+    UI::ChangeWidget (`id(`fcp_frame), `Enabled, Reipl::fcp_exists);
+    UI::ChangeWidget (`id(`usefcp), `Enabled, Reipl::fcp_exists);
+
+// @TODO
+//  UI::ChangeWidget(`id(`ccw_device), `ValidChars, "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_-");
+
+    any ret = nil;
+    while (true) {
+
+	ret = UI::UserInput ();
+
+	/* abort? */
+	if (ret == `abort || ret == `cancel) {
+	    // Check to see if any of the data has been modified
+	    if (Reipl::ccw_exists) {
+		if (ccw_map["device"]:"" != (string)UI::QueryWidget (`id (`ccw_device), `Value))
+		    Reipl::modified = true;
+		if (ccw_map["loadparm"]:"" != (string)UI::QueryWidget (`id (`ccw_loadparm), `Value))
+		    Reipl::modified = true;
+	    }
+
+	    if (Reipl::fcp_exists) {
+		if (fcp_map["device"]:"" != (string)UI::QueryWidget (`id (`fcp_device), `Value))
+		    Reipl::modified = true;
+		if (fcp_map["wwpn"]:"" != (string)UI::QueryWidget (`id (`fcp_wwpn), `Value))
+		    Reipl::modified = true;
+		if (fcp_map["lun"]:"" != (string)UI::QueryWidget (`id (`fcp_lun), `Value))
+		    Reipl::modified = true;
+		if (fcp_map["bootprog"]:"" != (string)UI::QueryWidget (`id (`fcp_bootprog), `Value))
+		    Reipl::modified = true;
+		if (fcp_map["br_lba"]:"" != (string)UI::QueryWidget (`id (`fcp_br_lba), `Value))
+		    Reipl::modified = true;
+	    }
+
+	    if (ReallyAbort ())
+		break;
+	    else
+		continue;
+	}
+        else if (ret == `next) {
+	    // Grab the data from the entry fields
+	    if (Reipl::ccw_exists) {
+		ccw_map["device"]   = (string)UI::QueryWidget (`id (`ccw_device), `Value);
+		ccw_map["loadparm"] = (string)UI::QueryWidget (`id (`ccw_loadparm), `Value);
+
+		// Apparently, maps are copy on write.  We need to put the new one back into the globals.
+		Reipl::reipl_configuration["ccw"] = ccw_map;
+	    }
+
+	    if (Reipl::fcp_exists) {
+		fcp_map["device"]   = (string)UI::QueryWidget (`id (`fcp_device), `Value);
+		fcp_map["wwpn"]     = (string)UI::QueryWidget (`id (`fcp_wwpn), `Value);
+		fcp_map["lun"]      = (string)UI::QueryWidget (`id (`fcp_lun), `Value);
+		fcp_map["bootprog"] = (string)UI::QueryWidget (`id (`fcp_bootprog), `Value);
+		fcp_map["br_lba"]   = (string)UI::QueryWidget (`id (`fcp_br_lba), `Value);
+
+		// Apparently, maps are copy on write.  We need to put the new one back into the globals.
+		Reipl::reipl_configuration["fcp"] = fcp_map;
+	    }
+
+	    break;
+	}
+        else if (ret == `back) {
+            break;
+        }
+	else if (ret == `usefcp) {
+	    continue;
+	}
+	else if (ret == `useccw) {
+	    continue;
+	}
+        else {
+            y2error ("unexpected retcode: %1", ret);
+            continue;
+        }
+    }
+
+    return ret;
+}
+
+/* EOF */
+}

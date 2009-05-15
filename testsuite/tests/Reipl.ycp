@@ -1,0 +1,13 @@
+{
+
+// testedfiles: Reipl.ycp
+
+include "testsuite.ycp";
+TESTSUITE_INIT([], nil);
+
+import "Reipl";
+
+DUMP("Reipl::Modified");
+TEST(``(Reipl::Modified()), [], nil);
+
+}

@@ -1,0 +1,47 @@
+-------------------------------------------------------------------
+Fri May 15 08:06:14 CEST 2009 - jsrain@suse.cz
+
+- backported for SLES10 SP3 (fate#305938)
+- 2.13.0
+
+-------------------------------------------------------------------
+Mon Apr 20 12:01:39 CEST 2009 - jsrain@suse.cz
+
+- fixed handling of more than 26 disks (bnc #492326)
+
+-------------------------------------------------------------------
+Mon Feb  9 09:38:05 CET 2009 - hare@suse.de
+
+- Final fix for reboot (bnc#471522)
+
+-------------------------------------------------------------------
+Fri Feb  6 11:28:36 CET 2009 - jsrain@suse.cz
+
+- fixed rebooting (bnc #471522)
+- 2.17.3
+
+-------------------------------------------------------------------
+Fri Oct 31 13:23:47 CET 2008 - jsrain@suse.cz
+
+- do not rely on bootloader module being initialized (bnc #440261)
+- 2.17.2
+
+-------------------------------------------------------------------
+Mon Oct 27 13:52:16 CET 2008 - jsrain@suse.cz
+
+- added more verbose logging
+- 2.17.1
+
+-------------------------------------------------------------------
+Thu Sep 11 13:18:49 CEST 2008 - locilka@suse.cz
+
+- Added reipl_finish to be called from installation.
+- Added reipl_bootloader_finish to be called from bootloader.
+- Fixed help texts - one gettext message for one <p>...</p>.
+- 2.17.0
+
+-------------------------------------------------------------------
+Thu Sep 11 13:18:34 CEST 2008 - uli@suse.de
+
+- Initial version
+
