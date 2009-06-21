@@ -19,7 +19,7 @@ PreReq:		%fillup_prereq
 Summary:	YaST2 - IPL loader
 
 %description
--
+Module for loading IPL from running system on S/390
 
 @PREP@
 
