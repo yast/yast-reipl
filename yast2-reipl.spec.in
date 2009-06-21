@@ -10,13 +10,13 @@ PreReq:		%fillup_prereq
 
 BuildArchitectures: noarch
 
-Summary:	Installation workflow
+Summary:	YaST2 - IPL loader
 
 Group:          System/YaST
 
 PreReq:		%fillup_prereq
 
-Summary:	reIPL
+Summary:	YaST2 - IPL loader
 
 %description
 -
