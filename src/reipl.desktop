@@ -17,8 +17,7 @@ X-SuSE-YaST-SortKey=
 X-SuSE-YaST-AutoInstResource=reipl
 
 Icon=yast-reipl
-Exec=/sbin/yast2 reipl 
+Exec=xdg-su -c "/sbin/yast2 reipl"
 
 Name=Reipl
 GenericName=reipl
-X-KDE-SubstituteUID=true
