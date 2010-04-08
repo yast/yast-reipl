@@ -1,3 +1,8 @@
+-------------------------------------------------------------------
+Thu Apr 08 09:43:39 CEST 2009 - jsrain@suse.cz
+
+- fixed reboot after installation into LVM (bnc#592838)
+
 ------------------------------------------------------------------
 Wed Jan 13 18:56:03 CET 2010 - kmachalkova@suse.cz
 

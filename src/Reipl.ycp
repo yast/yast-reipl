@@ -267,38 +267,40 @@ global list<string> FindBootPartition () {
 
 	y2milestone ("FindBootPartition: found that the MBR uses dasd (%1)", disk);
 
-	// bash-3.1# readlink -m /sys/block/dasda/device
-	// /sys/devices/css0/0.0.0006/0.0.4dcf
-	command = "/usr/bin/readlink -n -m " + FindSysfsRoot () + "/block/" + disk + "/device";
-	y2milestone ("Executing %1", command);
-	result = (map)SCR::Execute (.target.bash_output, command);
+	if (disk != nil) {
+	    // bash-3.1# readlink -m /sys/block/dasda/device
+	    // /sys/devices/css0/0.0.0006/0.0.4dcf
+	    command = "/usr/bin/readlink -n -m " + FindSysfsRoot () + "/block/" + disk + "/device";
+	    y2milestone ("Executing %1", command);
+	    result = (map)SCR::Execute (.target.bash_output, command);
 
-	if (result["exit"]:-1 != 0) {
-	    y2error ("FindBootPartition: Execute errors and returns %1", result["exit"]:-1);
-	    y2error ("FindBootPartition: Execute stdout is \"%1\"", result["stdout"]:"");
-	    y2error ("FindBootPartition: Execute stderr is \"%1\"", result["stderr"]:"");
+	    if (result["exit"]:-1 != 0) {
+		y2error ("FindBootPartition: Execute errors and returns %1", result["exit"]:-1);
+		y2error ("FindBootPartition: Execute stdout is \"%1\"", result["stdout"]:"");
+		y2error ("FindBootPartition: Execute stderr is \"%1\"", result["stderr"]:"");
 
-	    fError = true;
-	}
+		fError = true;
+	    }
 
-	y2milestone ("FindBootPartition: result = %1", result);
+	    y2milestone ("FindBootPartition: result = %1", result);
 
-	list<string> readlinkParts = nil;
+	    list<string> readlinkParts = nil;
 
-	readlinkParts = splitstring (result["stdout"]:"", "/");
+	    readlinkParts = splitstring (result["stdout"]:"", "/");
 
-	y2milestone ("FindBootPartition: readlinkParts = %1", readlinkParts);
+	    y2milestone ("FindBootPartition: readlinkParts = %1", readlinkParts);
 
-	if (size (readlinkParts) < 1) {
-	    y2error ("FindBootPartition: readlinkParts size is unexpected %1", readlinkParts);
+	    if (size (readlinkParts) < 1) {
+		y2error ("FindBootPartition: readlinkParts size is unexpected %1", readlinkParts);
 
-	    fError = true;
-	}
+		fError = true;
+	    }
 
-	string ccwDevice = readlinkParts[size (readlinkParts) - 1]:"";
+	    string ccwDevice = readlinkParts[size (readlinkParts) - 1]:"";
 
-	if (!fError) {
-	    uParts = [ "ccw", ccwDevice];
+	    if (!fError) {
+		uParts = [ "ccw", ccwDevice];
+	    }
 	}
 
     } else if (substring (fullDisk, 0, 2) == "sd") {
@@ -322,45 +324,47 @@ global list<string> FindBootPartition () {
 	    disk = split[0]:"" + split[1]:"";
 	}
 
-	y2milestone ("FindBootPartition: found that the MBR uses SCSI (%1)", disk);
+	if (disk != nil) {
+	    y2milestone ("FindBootPartition: found that the MBR uses SCSI (%1)", disk);
 
-	string deviceDirectory = FindSysfsRoot () + "/block/" + disk + "/device/";
+	    string deviceDirectory = FindSysfsRoot () + "/block/" + disk + "/device/";
 
-	// bash-3.1# cat /sys/block/sda/device/hba_id
-	// 0.0.1734
-	string hbaId = (string)SCR::Read (.target.string, deviceDirectory + "hba_id");
+	    // bash-3.1# cat /sys/block/sda/device/hba_id
+	    // 0.0.1734
+	    string hbaId = (string)SCR::Read (.target.string, deviceDirectory + "hba_id");
 
-	// bash-3.1# cat /sys/block/sda/device/wwpn
-	// 0x500507630300c562
-	string wwpn = (string)SCR::Read (.target.string, deviceDirectory + "wwpn");
+	    // bash-3.1# cat /sys/block/sda/device/wwpn
+	    // 0x500507630300c562
+	    string wwpn = (string)SCR::Read (.target.string, deviceDirectory + "wwpn");
 
-	// bash-3.1# cat /sys/block/sda/device/fcp_lun
-	// 0x401040eb00000000
-	string fcpLun = (string)SCR::Read (.target.string, deviceDirectory + "fcp_lun");
+	    // bash-3.1# cat /sys/block/sda/device/fcp_lun
+	    // 0x401040eb00000000
+	    string fcpLun = (string)SCR::Read (.target.string, deviceDirectory + "fcp_lun");
 
-	y2milestone ("FindBootPartition: hbaId  = %1", hbaId);
-	y2milestone ("FindBootPartition: wwpn   = %1", wwpn);
-	y2milestone ("FindBootPartition: fcpLun = %1", fcpLun);
+	    y2milestone ("FindBootPartition: hbaId  = %1", hbaId);
+	    y2milestone ("FindBootPartition: wwpn   = %1", wwpn);
+	    y2milestone ("FindBootPartition: fcpLun = %1", fcpLun);
 
-	hbaId  = deletechars (hbaId, "\n\r");
-	wwpn   = deletechars (wwpn, "\n\r");
-	fcpLun = deletechars (fcpLun, "\n\r");
+	    hbaId  = deletechars (hbaId, "\n\r");
+	    wwpn   = deletechars (wwpn, "\n\r");
+	    fcpLun = deletechars (fcpLun, "\n\r");
 
-	if (hbaId == nil || size (hbaId) == 0) {
-	    y2error ("FindBootPartition: hbaId is empty!");
-	    fError = true;
-	}
-	if (wwpn == nil || size (wwpn) == 0) {
-	    y2error ("FindBootPartition: wwpn is empty!");
-	    fError = true;
-	}
-	if (fcpLun == nil || size (fcpLun) == 0) {
-	    y2error ("FindBootPartition: fcpLun is empty!");
-	    fError = true;
-	}
+	    if (hbaId == nil || size (hbaId) == 0) {
+		y2error ("FindBootPartition: hbaId is empty!");
+		fError = true;
+	    }
+	    if (wwpn == nil || size (wwpn) == 0) {
+		y2error ("FindBootPartition: wwpn is empty!");
+		fError = true;
+	    }
+	    if (fcpLun == nil || size (fcpLun) == 0) {
+		y2error ("FindBootPartition: fcpLun is empty!");
+		fError = true;
+	    }
 
-	if (!fError) {
-	    uParts = [ "zfcp", hbaId, wwpn, fcpLun ];
+	    if (!fError) {
+		uParts = [ "zfcp", hbaId, wwpn, fcpLun ];
+	    }
 	}
 
     } else {
@@ -434,7 +438,8 @@ global map <string, any> ModifyReiplWithBootPartition (map <string, any> configu
  	y2milestone ("ModifyReiplWithBootPartition: modified fcp map");
     }
     else {
-	y2error ("ModifyReiplWithBootPartition: Should not be here, configuration unmodified!");
+	y2error ("ModifyReiplWithBootPartition: Unknown disk type!");
+	configuration["method"] = "unknown_disk_type";
     }
 
     return configuration;
@@ -528,7 +533,7 @@ global boolean Read () {
 global boolean WriteState (map <string, any> configuration) {
     boolean rc = true;
 
-    if (configuration["method"]:nil != nil) {
+    if (configuration["method"]:nil != nil && configuration["method"]:"unknown_disk_type" != "unknown_disk_type") {
 	y2milestone ("Reipl::WriteState: writing out method %1", configuration["method"]:"");
 
 	SCR::Write (.target.string, reipl_directory + "/reipl_type", (string)configuration["method"]:nil);

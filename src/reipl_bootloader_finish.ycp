@@ -88,7 +88,11 @@ with WWPN '%2'
 and LUN '%3'.
 "), dev, wwpn, lun);
 	    } else {
-	      y2warning("cannot make ipl text for unknown method");
+	      y2warning("making generic ipl text for unknown method");
+		ipl_msg = sformat (_("
+After shutdown, reload the system 
+with an IPL from the device 
+that contains /boot"));
 	    }
 	}
     }
