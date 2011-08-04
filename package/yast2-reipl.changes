@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Thu Aug  4 14:54:45 CEST 2011 - jsrain@suse.cz
+
+- fixed categories in the .desktop-file (bnc#607047)
+
+-------------------------------------------------------------------
 Thu Apr 08 09:43:39 CEST 2009 - jsrain@suse.cz
 
 - fixed reboot after installation into LVM (bnc#592838)
