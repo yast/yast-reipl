@@ -15,11 +15,6 @@ Thu Aug  4 14:54:45 CEST 2011 - jsrain@suse.cz
 - fixed categories in the .desktop-file (bnc#607047)
 
 -------------------------------------------------------------------
-Thu Apr 08 09:43:39 CEST 2009 - jsrain@suse.cz
-
-- fixed reboot after installation into LVM (bnc#592838)
-
-------------------------------------------------------------------
 Wed Jan 13 18:56:03 CET 2010 - kmachalkova@suse.cz
 
 - Adjusted .desktop file(s) to wrap /sbin/yast2/ calls in xdg-su
@@ -31,6 +26,11 @@ Mon Apr 20 12:01:39 CEST 2009 - jsrain@suse.cz
 
 - fixed handling of more than 26 disks (bnc #492326)
 - 2.18.0
+
+-------------------------------------------------------------------
+Thu Apr 08 09:43:39 CEST 2009 - jsrain@suse.cz
+
+- fixed reboot after installation into LVM (bnc#592838)
 
 -------------------------------------------------------------------
 Mon Feb  9 09:38:05 CET 2009 - hare@suse.de
