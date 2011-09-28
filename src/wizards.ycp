@@ -110,6 +110,7 @@ any ReiplSequence() {
     ];
 
     Wizard::CreateDialog();
+    Wizard::SetDesktopTitleAndIcon ("reipl");
 
     any ret = Sequencer::Run(aliases, sequence);
 
