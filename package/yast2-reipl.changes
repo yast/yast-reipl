@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Wed Dec  7 10:06:31 UTC 2011 - coolo@suse.com
+
+- fix license to be in spdx.org format
+
+-------------------------------------------------------------------
 Wed Sep 28 22:42:27 CEST 2011 - visnov@suse.cz
 
 - set dialog title
