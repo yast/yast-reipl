@@ -1,26 +1,34 @@
 @HEADER-COMMENT@
 
-
 @HEADER@
-Group:	System/YaST
-License:        GPL-2.0 ; GPL-2.0+
-BuildRequires:  docbook-xsl-stylesheets doxygen libxslt perl-XML-Writer sgml-skel update-desktop-files yast2-devtools yast2-testsuite yast2 yast2-storage yast2-bootloader
+BuildRequires:  docbook-xsl-stylesheets
+BuildRequires:  doxygen
+BuildRequires:  libxslt
+BuildRequires:  perl-XML-Writer
+BuildRequires:  sgml-skel
+BuildRequires:  update-desktop-files
+BuildRequires:  yast2
+BuildRequires:  yast2-bootloader
+BuildRequires:  yast2-devtools
+BuildRequires:  yast2-storage
+BuildRequires:  yast2-testsuite
 
-Requires: yast2-storage yast2-bootloader
+Requires:       yast2-storage yast2-bootloader
 # Wizard::SetDesktopTitleAndIcon
-Requires: yast2 >= 2.21.22
+Requires:       yast2 >= 2.21.22
 
-PreReq:		%fillup_prereq
+PreReq:         %fillup_prereq
 
-BuildArchitectures: noarch
+BuildArch:      noarch
 
-Summary:	YaST2 - IPL loader
-
+Summary:        YaST2 - IPL loader
+License:        GPL-2.0
 Group:          System/YaST
 
-PreReq:		%fillup_prereq
+PreReq:         %fillup_prereq
 
-Summary:	YaST2 - IPL loader
+Summary:        YaST2 - IPL loader
+Group:          System/YaST
 
 %description
 Module for loading IPL from running system on S/390
@@ -50,3 +58,5 @@ Module for loading IPL from running system on S/390
 %doc @docdir@/*
 %doc @docdir@/COPYING
 %readme @docdir@/README
+
+%changelog

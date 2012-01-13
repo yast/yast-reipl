@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Fri Jan 13 09:06:42 UTC 2012 - cfarrell@suse.com
+
+- license update: GPL-2.0
+  SPDX format for "GPL version 2 only"
+
+-------------------------------------------------------------------
 Wed Dec  7 10:06:31 UTC 2011 - coolo@suse.com
 
 - fix license to be in spdx.org format
