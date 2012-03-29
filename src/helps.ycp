@@ -38,7 +38,7 @@ map HELPS = $[
 
     /* Read dialog help 1/2 */
     "read" : _("<p><b><big>Initializing reipl Configuration</big></b><br>
-Please wait...<br></p>
+</p>
 ") +
 
     /* Read dialog help 2/2 */
@@ -48,7 +48,7 @@ Safely abort the configuration utility by pressing <b>Abort</b> now.</p>
 
     /* Write dialog help 1/2 */
     "write" : _("<p><b><big>Saving reipl Configuration</big></b><br>
-Please wait...<br></p>
+</p>
 ") +
 
     /* Write dialog help 2/2 */
@@ -62,11 +62,12 @@ An additional dialog informs whether it is safe to do so.
     "configure" : _("<p><b><big>s390 reIPL Configuration</big></b></p>") +
 
     /* Configure dialog help 2 */
-    _("<p>Choose one of the methods to reboot your machine with the radio buttons
+    _("<p>Choose one of the methods for rebooting your machine with the radio buttons
 listed inside <b>reipl methods</b>. Depending on what your machine supports,
-you can choose between CCW (channel command word) devices and SCSI devices,
-that are attached through zFCP (fibre channel protocol). Then fill out the
-necessary parameter entry fields for the respective method.</p>") +
+choose between CCW (channel command word) devices and SCSI devices,
+which are attached through zFCP (fibre channel protocol). Then fill out the
+necessary parameter entry fields for the respective method.</p>
+") +
 
     /* Configure dialog help 3 */
     _("<p>The <b>device</b> must be a valid device bus ID with lower case letters
@@ -80,8 +81,9 @@ configuration from the menu of the zipl bootloader. Use one blank character
 to select the default configuration.</p>") +
 
     /* Configure dialog help 5 */
-    _("<p>The <b>world wide port number</b> (WWPN) must be entered with lowercase
-letters as a 16-digit hex value, such as 0x5005076300c40e5a.</p>") +
+    _("<p>The <b>worldwide port number</b> (WWPN) must be entered with lowercase
+letters as a 16-digit hex value, such as 0x5005076300c40e5a.</p>
+") +
 
     /* Configure dialog help 6 */
     _("<p>The <b>logical unit number</b> (LUN) must be entered with lowercase letters
