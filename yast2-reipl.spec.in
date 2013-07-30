@@ -21,14 +21,12 @@ PreReq:         %fillup_prereq
 
 BuildArch:      noarch
 
+Requires:       yast2-ruby-bindings >= 1.0.0
+
 Summary:        YaST2 - IPL loader
 License:        GPL-2.0
 Group:          System/YaST
 
-PreReq:         %fillup_prereq
-
-Summary:        YaST2 - IPL loader
-Group:          System/YaST
 
 %description
 Module for loading IPL from running system on S/390
@@ -48,9 +46,8 @@ Module for loading IPL from running system on S/390
 
 %files
 %defattr(-,root,root)
-@clientdir@/*.ycp
-@moduledir@/*.ycp
-@moduledir@/*.ybc
+@clientdir@/*.rb
+@moduledir@/*.rb
 @desktopdir@/*.desktop
 %dir @yncludedir@/reipl
 @yncludedir@/reipl/*
