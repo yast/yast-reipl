@@ -1,33 +1,27 @@
-# Makefile.am for reipl/src
+# Sources for reipl
+
+module_DATA = \
+  modules/Reipl.rb
+
+client_DATA = \
+  clients/reipl.rb \
+  clients/reipl_auto.rb \
+  clients/reipl_bootloader_finish.rb \
+  clients/inst_reiplauto.rb \
+  clients/reipl_finish.rb \
+  clients/reipl_proposal.rb \
+  clients/inst_reipl.rb
 
 yncludedir = @yncludedir@/reipl
+ynclude_DATA = \
+  include/reipl/wizards.rb \
+  include/reipl/dialogs.rb \
+  include/reipl/complex.rb \
+  include/reipl/helps.rb
 
-client_DATA =			\
-	reipl.ycp		\
-	reipl_auto.ycp		\
-	reipl_proposal.ycp	\
-	inst_reipl.ycp		\
-	inst_reiplauto.ycp	\
-	reipl_finish.ycp	\
-	reipl_bootloader_finish.ycp
+desktop_DATA = \
+  desktop/reipl.desktop
 
-ynclude_DATA =			\
-	helps.ycp		\
-	wizards.ycp		\
-	dialogs.ycp		\
-	complex.ycp
-
-desktop_DATA =			\
-	reipl.desktop
-
-module_DATA =			\
-	Reipl.ycp
-
-# create a symlink for local build, #145327
-reipl:
-	ln -sf . $@
-ycpchook = reipl
-
-EXTRA_DIST = $(client_DATA) $(ynclude_DATA) $(module_DATA) $(desktop_DATA)
+EXTRA_DIST = $(module_DATA) $(client_DATA) $(ynclude_DATA) $(desktop_DATA)
 
 include $(top_srcdir)/Makefile.am.common
