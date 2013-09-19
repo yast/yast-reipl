@@ -1,5 +1,5 @@
 # -*- makefile -*- Automake include file
-# $Id: autodocs-ycp.ami 57644 2009-06-19 08:38:11Z mvidner $
+# $Id$
 
 # Builds source documentation for YCP sources
 # Uses ycpdoc
@@ -8,6 +8,8 @@
 #   		  Optional - the default is $(srcdir)/../../src/*.ycp
 #   AUTODOCS_PM: Files that the perl autodocs is built from
 #   		  Optional - the default is $(srcdir)/../../src/*.pm
+#   AUTODOCS_RB: Files that the ruby autodocs is built from (using yard)
+#   		  Optional - the default is $(srcdir)/../../src/modules/*.rb) $(srcdir)/../../src/include/*/*.rb
 #   AUTODOCS_SUBDIR: To install the result to $(docdir)/SUBDIR/autodocs
 #		Optional - the default is no subdir, $(docdir)/autodocs
 #   AUTODOCS_STRIP: Strip it from filenames. The remaining / are replaced by __
@@ -15,18 +17,34 @@
 
 htmldir = $(docdir)/$(AUTODOCS_SUBDIR)/autodocs
 
-html_DATA = index.html $(filter-out index.html, $(wildcard *.html))
-CLEANFILES = $(html_DATA) pod2htm*.tmp
+# find all files in Yast/ subdirectory if it exists
+YARD_YAST_FILES = $(shell test -d Yast && find Yast -type f)
+
+# use nobase_ prefix to keep the directory structure
+nobase_html_DATA = index.html $(filter-out index.html, $(wildcard *.html)) $(wildcard js/*) $(wildcard css/*) $(YARD_YAST_FILES)
+CLEANFILES = $(nobase_html_DATA) pod2htm*.tmp
 
 AUTODOCS_YCP ?= $(wildcard $(srcdir)/../../src/*.ycp)
 AUTODOCS_PM  ?= $(wildcard $(srcdir)/../../src/*.pm)
+AUTODOCS_RB  ?= $(wildcard $(srcdir)/../../src/modules/*.rb $(srcdir)/../../src/include/*/*.rb)
 AUTODOCS_STRIP ?= $(srcdir)/../../src
 
-index.html: $(AUTODOCS_YCP) $(AUTODOCS_PM)
+# yard specific options
+YARD ?= yard
+# use markdown format by default
+YARD_OPTIONS ?= -o . -m markdown
+
+# yard specific clean
+clean-local:
+	rm -rf js css Yast .yardoc
+
+
+index.html: $(AUTODOCS_YCP) $(AUTODOCS_PM) $(AUTODOCS_RB)
 #including *.pm, for the index
-	${YCPDOC} -d. -s$(AUTODOCS_STRIP) $(AUTODOCS_YCP)
+	if [ -n "$(AUTODOCS_YCP)" ]; then ${YCPDOC} -d. -s$(AUTODOCS_STRIP) $(AUTODOCS_YCP); fi
 	for i in $(AUTODOCS_PM); do \
 		b=$${i##$(AUTODOCS_STRIP)}; b=$${b#/}; b=$${b//\//__}; b=$${b%.pm}; \
 		pod2html --title=$$b --infile=$$i --outfile=$$b.html; \
 		echo "<a href='$$b.html'>$${b/__/::}</a>" > $$b.mod.html; \
 	done
+	if [ -n "$(AUTODOCS_RB)" ]; then $(YARD) doc --title "@RPMNAME@ -- Development Documentation" $(YARD_OPTIONS) $(AUTODOCS_RB); fi
