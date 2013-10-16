@@ -76,6 +76,5 @@ Module for loading IPL from running system on S/390
 %dir %{yast_docdir}
 %doc %{yast_docdir}/*
 %doc %{yast_docdir}/COPYING
-%readme %{yast_docdir}/README
 
 %changelog
