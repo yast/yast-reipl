@@ -31,7 +31,7 @@ BuildRequires:  sgml-skel
 BuildRequires:  update-desktop-files
 BuildRequires:  yast2
 BuildRequires:  yast2-bootloader
-BuildRequires:  yast2-devtools >= 3.0.6
+BuildRequires:  yast2-devtools >= 3.1.10
 BuildRequires:  yast2-storage
 BuildRequires:  yast2-testsuite
 
