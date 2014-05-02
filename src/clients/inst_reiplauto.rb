@@ -43,13 +43,7 @@ module Yast
       Yast.import "Confirm"
       Yast.import "Storage"
       # The main ()
-      Builtins.y2milestone("----------------------------------------")
-      Builtins.y2milestone("inst_reiplauto started")
-
-      if !Reipl.SanityCheck
-        Builtins.y2milestone("SanityCheck failed!")
-        return :cancel
-      end
+      Builtins.y2milestone("inst_reiplauto started ----------------------------------------")
 
       @args = GetInstArgs.argmap
 
@@ -63,12 +57,9 @@ module Yast
 
       @configuration = Reipl.ReadState
 
-      if @configuration != nil
-        @configuration = Reipl.ModifyReiplWithBootPartition(@configuration)
-
-        if @configuration != nil
-          Reipl.WriteState(@configuration)
-        else
+      if @configuration != nil 
+	
+        if Reipl.IPL_from_boot_zipl == false
           Builtins.y2error("Could not modify reipl configuration")
         end
       else
@@ -76,8 +67,7 @@ module Yast
       end
 
       # Finish
-      Builtins.y2milestone("inst_reiplauto finished")
-      Builtins.y2milestone("----------------------------------------")
+      Builtins.y2milestone("inst_reiplauto finished ----------------------------------------")
 
       :next 
 

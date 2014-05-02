@@ -38,8 +38,7 @@ module Yast
       textdomain "reipl"
 
       # The main ()
-      Builtins.y2milestone("----------------------------------------")
-      Builtins.y2milestone("Reipl module started")
+      Builtins.y2milestone("Reipl module started ----------------------------------------")
 
       Yast.import "Progress"
       Yast.import "Report"
@@ -89,8 +88,7 @@ module Yast
       Builtins.y2debug("ret=%1", @ret)
 
       # Finish
-      Builtins.y2milestone("Reipl module finished")
-      Builtins.y2milestone("----------------------------------------")
+      Builtins.y2milestone("Reipl module finished ----------------------------------------")
 
       deep_copy(@ret) 
 
