@@ -69,7 +69,6 @@ module Yast
               Left(
                 RadioButton(
                   Id(:useccw),
-                  Opt(:notify),
                   _("&ccw"),
                   Reipl.ccw_exists
                 )
@@ -77,7 +76,6 @@ module Yast
               Left(
                 RadioButton(
                   Id(:usefcp),
-                  Opt(:notify),
                   _("&fcp"),
                   Reipl.fcp_exists
                 )
@@ -85,7 +83,6 @@ module Yast
               Left(
                 RadioButton(
                   Id(:usenss),
-                  Opt(:notify),
                   _("&nss"),
                   Reipl.nss_exists
                 )
@@ -290,12 +287,6 @@ module Yast
           break
         elsif ret == :back
           break
-        elsif ret == :usefcp
-          next
-        elsif ret == :useccw
-          next
-	elsif ret == :usenss
-          next
         else
           Builtins.y2error("unexpected retcode: %1", ret)
           next
