@@ -42,8 +42,7 @@ module Yast
 
       textdomain "reipl"
 
-      Builtins.y2milestone("----------------------------------------")
-      Builtins.y2milestone("Reipl auto started")
+      Builtins.y2milestone("Reipl auto started ----------------------------------------")
 
       Yast.import "Reipl"
       Yast.include self, "reipl/wizards.rb"
@@ -111,8 +110,7 @@ module Yast
       end
 
       Builtins.y2debug("ret=%1", @ret)
-      Builtins.y2milestone("Reipl auto finished")
-      Builtins.y2milestone("----------------------------------------")
+      Builtins.y2milestone("Reipl auto finished ----------------------------------------")
 
       deep_copy(@ret) 
 

@@ -42,15 +42,9 @@ module Yast
     # Configure dialog
     # @return dialog result
     def ConfigureDialog
-      ccw_map = Convert.convert(
-        Ops.get(Reipl.reipl_configuration, "ccw") do
+      ccw_map = Reipl.reipl_configuration["ccw"] ||
           { "device" => "", "loadparm" => "" }
-        end,
-        :from => "any",
-        :to   => "map <string, string>"
-      )
-      fcp_map = Convert.convert(
-        Ops.get(Reipl.reipl_configuration, "fcp") do
+      fcp_map = Reipl.reipl_configuration["fcp"] ||
           {
             "device"   => "",
             "wwpn"     => "",
@@ -58,10 +52,8 @@ module Yast
             "bootprog" => "",
             "br_lba"   => ""
           }
-        end,
-        :from => "any",
-        :to   => "map <string, string>"
-      )
+      nss_map = Reipl.reipl_configuration["nss"] ||
+          { "name" => "" }
 
       # Reipl configure dialog caption
       caption = _("Reipl Configuration")
@@ -77,7 +69,6 @@ module Yast
               Left(
                 RadioButton(
                   Id(:useccw),
-                  Opt(:notify),
                   _("&ccw"),
                   Reipl.ccw_exists
                 )
@@ -85,9 +76,15 @@ module Yast
               Left(
                 RadioButton(
                   Id(:usefcp),
-                  Opt(:notify),
                   _("&fcp"),
                   Reipl.fcp_exists
+                )
+              ),
+              Left(
+                RadioButton(
+                  Id(:usenss),
+                  _("&nss"),
+                  Reipl.nss_exists
                 )
               ),
               VSpacing(0.2)
@@ -144,11 +141,19 @@ module Yast
             _("B&oot program selector"),
             Ops.get_string(fcp_map, "bootprog", "")
           ),
+          VSpacing(0.2)
+        )
+      )
+
+      nss_contents = Frame(
+        Id(:nss_frame),
+        _("nss parameters"),
+        VBox(
           VSpacing(0.2),
           TextEntry(
-            Id(:fcp_br_lba),
-            _("Boo&t record logical block address"),
-            Ops.get_string(fcp_map, "br_lba", "")
+            Id(:nss_name),
+            _("&Name"),
+            Ops.get_string(ccw_map, "name", "")
           ),
           VSpacing(0.2)
         )
@@ -160,7 +165,9 @@ module Yast
           VSpacing(1),
           ccw_contents,
           VSpacing(1),
-          fcp_contents
+          fcp_contents,
+          VSpacing(1),
+          nss_contents
         )
       )
 
@@ -176,6 +183,8 @@ module Yast
       UI.ChangeWidget(Id(:useccw), :Enabled, Reipl.ccw_exists)
       UI.ChangeWidget(Id(:fcp_frame), :Enabled, Reipl.fcp_exists)
       UI.ChangeWidget(Id(:usefcp), :Enabled, Reipl.fcp_exists)
+      UI.ChangeWidget(Id(:nss_frame), :Enabled, Reipl.nss_exists)
+      UI.ChangeWidget(Id(:usenss), :Enabled, Reipl.nss_exists)
 
       # @TODO
       #  UI::ChangeWidget(`id(`ccw_device), `ValidChars, "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_-");
@@ -215,8 +224,10 @@ module Yast
                 Convert.to_string(UI.QueryWidget(Id(:fcp_bootprog), :Value))
               Reipl.modified = true
             end
-            if Ops.get_string(fcp_map, "br_lba", "") !=
-                Convert.to_string(UI.QueryWidget(Id(:fcp_br_lba), :Value))
+          end
+          if Reipl.nss_exists
+            if Ops.get_string(nss_map, "name", "") !=
+                Convert.to_string(UI.QueryWidget(Id(:nss_name), :Value))
               Reipl.modified = true
             end
           end
@@ -229,14 +240,10 @@ module Yast
         elsif ret == :next
           # Grab the data from the entry fields
           if Reipl.ccw_exists
-            Ops.set(
-              ccw_map,
-              "device",
+            Ops.set(ccw_map, "device",
               Convert.to_string(UI.QueryWidget(Id(:ccw_device), :Value))
             )
-            Ops.set(
-              ccw_map,
-              "loadparm",
+            Ops.set(ccw_map, "loadparm",
               Convert.to_string(UI.QueryWidget(Id(:ccw_loadparm), :Value))
             )
 
@@ -265,23 +272,21 @@ module Yast
               "bootprog",
               Convert.to_string(UI.QueryWidget(Id(:fcp_bootprog), :Value))
             )
-            Ops.set(
-              fcp_map,
-              "br_lba",
-              Convert.to_string(UI.QueryWidget(Id(:fcp_br_lba), :Value))
-            )
-
             # Apparently, maps are copy on write.  We need to put the new one back into the globals.
             Ops.set(Reipl.reipl_configuration, "fcp", fcp_map)
+          end
+
+          if Reipl.nss_exists
+            Ops.set(nss_map, "name",
+              Convert.to_string(UI.QueryWidget(Id(:nss_name), :Value))
+            )
+            # Apparently, maps are copy on write.  We need to put the new one back into the globals.
+            Ops.set(Reipl.reipl_configuration, "nss", nss_map)
           end
 
           break
         elsif ret == :back
           break
-        elsif ret == :usefcp
-          next
-        elsif ret == :useccw
-          next
         else
           Builtins.y2error("unexpected retcode: %1", ret)
           next

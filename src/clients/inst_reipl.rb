@@ -46,8 +46,7 @@ module Yast
       Yast.include self, "reipl/dialogs.rb"
 
       # The main ()
-      Builtins.y2milestone("----------------------------------------")
-      Builtins.y2milestone("Reipl module started")
+      Builtins.y2milestone("Reipl module started ----------------------------------------")
 
       @args = GetInstArgs.argmap
 
@@ -64,8 +63,7 @@ module Yast
       @ret = Convert.to_symbol(ConfigureDialog())
 
       # Finish
-      Builtins.y2milestone("Reipl module finished")
-      Builtins.y2milestone("----------------------------------------")
+      Builtins.y2milestone("Reipl module finished ----------------------------------------")
 
       @ret 
 
