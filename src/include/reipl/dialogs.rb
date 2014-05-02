@@ -42,15 +42,9 @@ module Yast
     # Configure dialog
     # @return dialog result
     def ConfigureDialog
-      ccw_map = Convert.convert(
-        Ops.get(Reipl.reipl_configuration, "ccw") do
+      ccw_map = Reipl.reipl_configuration["ccw"] ||
           { "device" => "", "loadparm" => "" }
-        end,
-        :from => "any",
-        :to   => "map <string, string>"
-      )
-      fcp_map = Convert.convert(
-        Ops.get(Reipl.reipl_configuration, "fcp") do
+      fcp_map = Reipl.reipl_configuration["fcp"] ||
           {
             "device"   => "",
             "wwpn"     => "",
@@ -58,17 +52,8 @@ module Yast
             "bootprog" => "",
             "br_lba"   => ""
           }
-        end,
-        :from => "any",
-        :to   => "map <string, string>"
-      )
-      nss_map = Convert.convert(
-        Ops.get(Reipl.reipl_configuration, "nss") do
+      nss_map = Reipl.reipl_configuration["nss"] ||
           { "name" => "" }
-        end,
-        :from => "any",
-        :to   => "map <string, string>"
-      )
 
       # Reipl configure dialog caption
       caption = _("Reipl Configuration")
@@ -310,6 +295,7 @@ module Yast
         elsif ret == :useccw
           next
 	elsif ret == :usenss
+          next
         else
           Builtins.y2error("unexpected retcode: %1", ret)
           next

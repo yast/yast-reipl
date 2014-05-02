@@ -76,19 +76,19 @@ module Yast
       #		]
       #];
 
-      @reipl_directory = Ops.add("/sys", "/firmware/reipl")
-      @ccw_directory = Ops.add(@reipl_directory, "/ccw")
-      @fcp_directory = Ops.add(@reipl_directory, "/fcp")
-      @nss_directory = Ops.add(@reipl_directory, "/nss")
-      @ccw_exists = FileUtils.IsDirectory(@ccw_directory) != nil
-      @fcp_exists = FileUtils.IsDirectory(@fcp_directory) != nil
-      @nss_exists = FileUtils.IsDirectory(@fcp_directory) != nil
+      @reipl_directory = "/sys/firmware/reipl"
+      @ccw_directory = @reipl_directory + "/ccw"
+      @fcp_directory = @reipl_directory + "/fcp"
+      @nss_directory = @reipl_directory + "/nss"
+      @ccw_exists = FileUtils.IsDirectory(@ccw_directory)
+      @fcp_exists = FileUtils.IsDirectory(@fcp_directory)
+      @nss_exists = FileUtils.IsDirectory(@fcp_directory)
     end
 
     # Abort function
     # @return [Boolean] return true if abort
     def Abort
-      return @AbortFunction.call == true if @AbortFunction != nil
+      return @AbortFunction.call if @AbortFunction
       false
     end
 
@@ -114,24 +114,8 @@ module Yast
     # @return a map of the new target configuration.
     def IPL_from_boot_zipl
       # get target information
-#	result = Yast::SCR.Execute(path(".target.bash_output"), "lsreipl")
-#	raise "Calling lsreipl failed with #{result["stderr"]}" unless result["exit"].zero?
-#
-#	lines = result["stdout"].split("\n")
-#	type = lines[0][/ccw$|fcp$|node$/]
-#	raise "Ergebnis ist #{type} IHNO"
-#
-	result = Yast::SCR.Execute(path(".target.bash_output"), "chreipl node /mnt/boot/zipl")
-	if Ops.get(result, "exit") == 0
-            rc = true
-        else
-            rc = false
-        end
-
-#	ipl_from_boot_zipl_lines = result["stdout"].split("\n")
-#	type = ipl_from_boot_zipl_lines[0][/ccw$|fcp$|node$/]
-
-      rc
+      result = Yast::SCR.Execute(path(".target.bash_output"), "chreipl node /mnt/boot/zipl")
+      return result["exit"] == 0
     end
 
     # Read all reipl settings
@@ -155,45 +139,31 @@ module Yast
         { "name" => "", "loadparm" => "", "parm" => "" }
 	)
 
-#      if !SanityCheck()
-#        Builtins.y2error("Reipl::Read: SanityCheck failed!")
-#
-#        # Popup::Error (_("This machine does not support reipl!"));
-#        # Don't bother the user, just silently do shutdown in the end.
-#        #    Especially, since this would currently popup three times
-#        #    during installation.
-#
-#        return deep_copy(configuration)
-#      end
+      result = Yast::SCR.Execute(path(".target.bash_output"), "lsreipl")
+      raise "Calling lsreipl failed with #{result["stderr"]}" unless result["exit"].zero?
 
-	result = Yast::SCR.Execute(path(".target.bash_output"), "lsreipl")
-	raise "Calling lsreipl failed with #{result["stderr"]}" unless result["exit"].zero?
+      lsreipl_lines = result["stdout"].split("\n")
+      type = lsreipl_lines[0][/ccw$|fcp$|node$/]
+      if type == "ccw"
+         ccw_map = Ops.get_map(configuration, "ccw")
+         Ops.set(ccw_map, "device", Builtins.deletechars(Convert.to_string(lsreipl_lines[1][/[0-3]\.[0-3]\.[\h.]*$/]), "\n "))
+         Ops.set(ccw_map, "loadparm", Builtins.deletechars(Convert.to_string(lsreipl_lines[2][/".*"$/]), "\n \""))
+         Ops.set(ccw_map, "parm", Builtins.deletechars(Convert.to_string(lsreipl_lines[3][/".*"$/]), "\n \""))
+         Ops.set(configuration, "ccw", ccw_map)
+      end
+      if type == "fcp"
+          fcp_map = Ops.get_map(configuration, "fcp")
+         Ops.set(ccw_map, "wwpm", Builtins.deletechars(Convert.to_string(lsreipl_lines[1][/[x\h]*$/]), "\n "))
+         Ops.set(ccw_map, "lun", Builtins.deletechars(Convert.to_string(lsreipl_lines[2][/[x\h]*$/]), "\n "))
+         Ops.set(ccw_map, "device", Builtins.deletechars(Convert.to_string(lsreipl_lines[3][/[0-3]\.[0-3]\.[\h.]*$/]), "\n "))
+         Ops.set(ccw_map, "bootprog", Builtins.deletechars(Convert.to_string(lsreipl_lines[4][/[0-9]*$/]), "\n "))
+         Ops.set(ccw_map, "br_lbr", Builtins.deletechars(Convert.to_string(lsreipl_lines[5][/[0-9]*$/]), "\n "))
+         Ops.set(ccw_map, "bootparms", Builtins.deletechars(Convert.to_string(lsreipl_lines[6][/".*"*$/]), "\n \""))
+         Ops.set(configuration, "fcp", fcp_map)
 
-	lsreipl_lines = result["stdout"].split("\n")
-	type = lsreipl_lines[0][/ccw$|fcp$|node$/]
-	if type == "ccw"
-           ccw_map = Ops.get_map(configuration, "ccw")
-	   Ops.set(ccw_map, "device", Builtins.deletechars(Convert.to_string(lsreipl_lines[1][/[0-3]\.[0-3]\.[\h.]*$/]), "\n "))
-	   Ops.set(ccw_map, "loadparm", Builtins.deletechars(Convert.to_string(lsreipl_lines[2][/".*"$/]), "\n \""))
-	   Ops.set(ccw_map, "parm", Builtins.deletechars(Convert.to_string(lsreipl_lines[3][/".*"$/]), "\n \""))
-           Ops.set(configuration, "ccw", ccw_map)
-	
-	end
-	if type == "fcp"
-	    fcp_map = Ops.get_map(configuration, "fcp")
-	   Ops.set(ccw_map, "wwpm", Builtins.deletechars(Convert.to_string(lsreipl_lines[1][/[x\h]*$/]), "\n "))
-	   Ops.set(ccw_map, "lun", Builtins.deletechars(Convert.to_string(lsreipl_lines[2][/[x\h]*$/]), "\n "))
-	   Ops.set(ccw_map, "device", Builtins.deletechars(Convert.to_string(lsreipl_lines[3][/[0-3]\.[0-3]\.[\h.]*$/]), "\n "))
-	   Ops.set(ccw_map, "bootprog", Builtins.deletechars(Convert.to_string(lsreipl_lines[4][/[0-9]*$/]), "\n "))
-	   Ops.set(ccw_map, "br_lbr", Builtins.deletechars(Convert.to_string(lsreipl_lines[5][/[0-9]*$/]), "\n "))
-	   Ops.set(ccw_map, "bootparms", Builtins.deletechars(Convert.to_string(lsreipl_lines[6][/".*"*$/]), "\n \""))
-           Ops.set(configuration, "fcp", fcp_map)
+      end
 
-#	    raise "Ergebnis ist #{Ops.get(ccw_map,"device")} #{Ops.get(ccw_map,"loadparm")} #{Ops.get(ccw_map,"parm")} IHNO"
-	end
-#	raise "Ergebnis ist #{type} IHNO"
-
-      Ops.set(configuration, "method", type)
+      configuration["method"] = type
 
       deep_copy(configuration)
     end
@@ -203,7 +173,7 @@ module Yast
     def Read
       configuration = ReadState()
 
-      @reipl_configuration = deep_copy(configuration) if configuration != nil
+      @reipl_configuration = deep_copy(configuration) if configuration
 
       return false if Abort()
       @modified = false
@@ -253,7 +223,6 @@ module Yast
 
 	  device = Ops.get_string(fcp_map, "device") + " " + Ops.get_string(fcp_map, "wwpn") + " " + Ops.get_string(fcp_map, "lun")
 	  loadparm = Ops.get_string(fcp_map, "loadparm", "???")
-#          loadparm = Ops.add(loadparm, Ops.add(" -b ", Ops.get_string(fcp_map, "bootprog")), "\" > ")
 
           Builtins.y2milestone("FCP Device %1, loadparm %2 %1", device, loadparm)
 
@@ -273,7 +242,7 @@ module Yast
       # now type, device, loadparm contain all what is needed to call chreipl
       chreiplCmd = "chreipl " + type  + " " + device
       if loadparm != ""
-      	chreiplCmd = chreiplCmd + " -L " + loadparm
+      	chreiplCmd << " -L " + loadparm
       end
       Builtins.y2milestone("Executing %1", chreiplCmd)
       result = Convert.to_map(SCR.Execute(path(".target.bash_output"), chreiplCmd))
@@ -420,7 +389,6 @@ module Yast
     publish :variable => :AbortFunction, :type => "boolean ()"
     publish :function => :Abort, :type => "boolean ()"
     publish :function => :SetModified, :type => "void ()"
-#    publish :function => :FindSysfsRoot, :type => "string ()"
     publish :variable => :reipl_configuration, :type => "map <string, any>"
     publish :variable => :reipl_directory, :type => "string"
     publish :variable => :ccw_directory, :type => "string"
@@ -429,8 +397,6 @@ module Yast
     publish :variable => :ccw_exists, :type => "boolean"
     publish :variable => :fcp_exists, :type => "boolean"
     publish :variable => :nss_exists, :type => "boolean"
-#    publish :function => :SanityCheck, :type => "boolean ()"
-#    publish :function => :FindBootPartition, :type => "list <string> ()"
     publish :function => :IPL_from_boot_zipl, :type => "boolean ()"
     publish :function => :ReadState, :type => "map <string, any> ()"
     publish :function => :Read, :type => "boolean ()"

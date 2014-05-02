@@ -47,9 +47,8 @@ module Yast
 
       @args = GetInstArgs.argmap
 
-      if Ops.get_string(@args, "first_run", "yes") != "no"
-        Ops.set(@args, "first_run", "yes")
-      end
+      # first run unless explicitelly mentioned
+      @args["first_run"] = "yes" if @args["first_run"] != "no"
 
       Wizard.HideAbortButton if Mode.mode == "firstboot"
 
@@ -57,9 +56,8 @@ module Yast
 
       @configuration = Reipl.ReadState
 
-      if @configuration != nil 
-	
-        if Reipl.IPL_from_boot_zipl == false
+      if !@configuration.nil?
+        if !Reipl.IPL_from_boot_zipl
           Builtins.y2error("Could not modify reipl configuration")
         end
       else
@@ -69,7 +67,7 @@ module Yast
       # Finish
       Builtins.y2milestone("inst_reiplauto finished ----------------------------------------")
 
-      :next 
+      :next
 
       # EOF
     end
