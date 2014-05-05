@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Mon May  5 15:42:32 UTC 2014 - jreidinger@suse.com
+
+- call chreipl without target prefix as it is called in chroot
+  ( patch by Ihno )
+- 3.1.3
+
+-------------------------------------------------------------------
 Fri May  2 12:21:49 UTC 2014 - jreidinger@suse.com
 
 - adapt module to SLE12 code base (bcn#875515) ( patch by Ihno )
