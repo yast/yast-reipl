@@ -114,7 +114,7 @@ module Yast
     # @return a map of the new target configuration.
     def IPL_from_boot_zipl
       # get target information
-      result = Yast::SCR.Execute(path(".target.bash_output"), "chreipl node /mnt/boot/zipl")
+      result = Yast::SCR.Execute(path(".target.bash_output"), "chreipl node /boot/zipl")
       return result["exit"] == 0
     end
 
