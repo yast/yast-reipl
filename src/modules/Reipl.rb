@@ -123,21 +123,9 @@ module Yast
     def ReadState
       configuration = {}
         Builtins.y2milestone("ReadState: The beginngn")
-      Ops.set(
-        configuration,
-        "ccw",
-        { "device" => "", "loadparm" => "", "parm" => "" }
-      )
-      Ops.set(
-        configuration,
-        "fcp",
-        { "device"   => "", "wwpn"     => "", "lun"      => "", "bootprog" => "", "br_lba"   => "", "bootparms"	=> "" }
-      )
-      Ops.set(
-	configuration,
-	"nss",
-        { "name" => "", "loadparm" => "", "parm" => "" }
-	)
+      Ops.set(configuration, "ccw", { "device" => "", "loadparm" => "", "parm" => "" })
+      Ops.set(configuration, "fcp", { "device"   => "", "wwpn"     => "", "lun"      => "", "bootprog" => "", "br_lba"   => "", "bootparms"	=> "" })
+      Ops.set(configuration, "nss", { "name" => "", "loadparm" => "", "parm" => "" })
 
       result = Yast::SCR.Execute(path(".target.bash_output"), "lsreipl")
       raise "Calling lsreipl failed with #{result["stderr"]}" unless result["exit"].zero?
@@ -160,7 +148,6 @@ module Yast
          Ops.set(ccw_map, "br_lbr", Builtins.deletechars(Convert.to_string(lsreipl_lines[5][/[0-9]*$/]), "\n "))
          Ops.set(ccw_map, "bootparms", Builtins.deletechars(Convert.to_string(lsreipl_lines[6][/".*"*$/]), "\n \""))
          Ops.set(configuration, "fcp", fcp_map)
-
       end
 
       configuration["method"] = type

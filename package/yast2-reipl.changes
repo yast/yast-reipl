@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Wed May 21 09:46:40 UTC 2014 - jreidinger@suse.com
+
+- do not call reipl mutliple time during installation
+  (patch by Ihno)
+- 3.1.4
+
+-------------------------------------------------------------------
 Mon May  5 15:42:32 UTC 2014 - jreidinger@suse.com
 
 - call chreipl without target prefix as it is called in chroot

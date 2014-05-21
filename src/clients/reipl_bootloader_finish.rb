@@ -55,11 +55,7 @@ module Yast
           Builtins.y2milestone("newConfiguration['method'] :  %1", Ops.get_string(@newConfiguration, "method", "ERROR"))
           if Ops.get_string(@newConfiguration, "method", "ERROR") == "ccw"
             Builtins.y2milestone("making ccw ipl text")
-            @dev = Builtins.substring(
-              Ops.get_string(@newCcwMap, "device", ""),
-              4,
-              4
-            )
+            @dev = Builtins.substring(Ops.get_string(@newCcwMap, "device", ""), 4, 4)
 
             # TRANSLATORS: part of a shutdown message
             # %1 is replaced with a device name
@@ -74,11 +70,7 @@ module Yast
             )
           elsif Ops.get_string(@newConfiguration, "method", "ERROR") == "fcp"
             Builtins.y2milestone("making fcp ipl text")
-            @dev = Builtins.substring(
-              Ops.get_string(@newFcpMap, "device", ""),
-              4,
-              4
-            )
+            @dev = Builtins.substring(Ops.get_string(@newFcpMap, "device", ""), 4, 4)
             @wwpn = Ops.get_string(@newFcpMap, "wwpn", "")
             @lun = Ops.get_string(@newFcpMap, "lun", "")
 

@@ -7,7 +7,6 @@ client_DATA = \
   clients/reipl.rb \
   clients/reipl_auto.rb \
   clients/reipl_bootloader_finish.rb \
-  clients/inst_reiplauto.rb \
   clients/reipl_finish.rb \
   clients/reipl_proposal.rb \
   clients/inst_reipl.rb
