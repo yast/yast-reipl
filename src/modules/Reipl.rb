@@ -133,20 +133,20 @@ module Yast
       lsreipl_lines = result["stdout"].split("\n")
       type = lsreipl_lines[0][/ccw$|fcp$|node$/]
       if type == "ccw"
-         ccw_map = Ops.get_map(configuration, "ccw")
-         Ops.set(ccw_map, "device", Builtins.deletechars(Convert.to_string(lsreipl_lines[1][/[0-3]\.[0-3]\.[\h.]*$/]), "\n "))
-         Ops.set(ccw_map, "loadparm", Builtins.deletechars(Convert.to_string(lsreipl_lines[2][/".*"$/]), "\n \""))
-         Ops.set(ccw_map, "parm", Builtins.deletechars(Convert.to_string(lsreipl_lines[3][/".*"$/]), "\n \""))
+         ccw_map = configuration["ccw"]
+         ccw_map["device"] = Builtins.deletechars(Convert.to_string(lsreipl_lines[1][/[0-3]\.[0-3]\.[\h.]*$/]), "\n ") if lsreipl_lines[1]
+         ccw_map["loadparm"] = Builtins.deletechars(Convert.to_string(lsreipl_lines[2][/".*"$/]), "\n \"") if lsreipl_lines[2]
+         ccw_map["parm"] = Builtins.deletechars(Convert.to_string(lsreipl_lines[3][/".*"$/]), "\n \"") if lsreipl_lines[3]
          Ops.set(configuration, "ccw", ccw_map)
       end
       if type == "fcp"
-          fcp_map = Ops.get_map(configuration, "fcp")
-         Ops.set(ccw_map, "wwpm", Builtins.deletechars(Convert.to_string(lsreipl_lines[1][/[x\h]*$/]), "\n "))
-         Ops.set(ccw_map, "lun", Builtins.deletechars(Convert.to_string(lsreipl_lines[2][/[x\h]*$/]), "\n "))
-         Ops.set(ccw_map, "device", Builtins.deletechars(Convert.to_string(lsreipl_lines[3][/[0-3]\.[0-3]\.[\h.]*$/]), "\n "))
-         Ops.set(ccw_map, "bootprog", Builtins.deletechars(Convert.to_string(lsreipl_lines[4][/[0-9]*$/]), "\n "))
-         Ops.set(ccw_map, "br_lbr", Builtins.deletechars(Convert.to_string(lsreipl_lines[5][/[0-9]*$/]), "\n "))
-         Ops.set(ccw_map, "bootparms", Builtins.deletechars(Convert.to_string(lsreipl_lines[6][/".*"*$/]), "\n \""))
+         fcp_map = configuration["fcp"]
+         ccw_map["wwpm"] = Builtins.deletechars(Convert.to_string(lsreipl_lines[1][/[x\h]*$/]), "\n ") if lsreipl_lines[1]
+         ccw_map["lun"] = Builtins.deletechars(Convert.to_string(lsreipl_lines[2][/[x\h]*$/]), "\n ") if lsreipl_lines[2]
+         ccw_map["device"] = Builtins.deletechars(Convert.to_string(lsreipl_lines[3][/[0-3]\.[0-3]\.[\h.]*$/]), "\n ") if lsreipl_lines[3]
+         ccw_map["bootprog"] = Builtins.deletechars(Convert.to_string(lsreipl_lines[4][/[0-9]*$/]), "\n ") if lsreipl_lines[4]
+         ccw_map["br_lbr"] = Builtins.deletechars(Convert.to_string(lsreipl_lines[5][/[0-9]*$/]), "\n ") if lsreipl_lines[5]
+         ccw_map["bootparms"] = Builtins.deletechars(Convert.to_string(lsreipl_lines[6][/".*"*$/]), "\n \"") if lsreipl_lines[6]
          Ops.set(configuration, "fcp", fcp_map)
       end
 
