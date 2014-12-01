@@ -21,7 +21,6 @@ describe "Reipl#ReadState" do
 
     expect(Yast::SCR).to receive(:Execute).with(anything(), /lsreipl/).and_return({ "exit" => 0, "stderr" => "", "stdout" => lsreipl_output })
 
-
     expect(Yast::Reipl.ReadState()).to eq( lsreipl_map )
   end
 
