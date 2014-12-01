@@ -2,7 +2,7 @@
 # Makefile.am for reipl/test
 #
 
-TESTS = Reipl_test.rb
+TESTS = reipl_test.rb
 
 TEST_EXTENSIONS = .rb
 RB_LOG_COMPILER = rspec
