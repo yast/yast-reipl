@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu Nov  6 12:41:25 CET 2014 - schubi@suse.de
+
+- Fixed parsing of lsreipl output (bnc#902094)
+- 3.1.5
+
+-------------------------------------------------------------------
 Wed May 21 09:46:40 UTC 2014 - jreidinger@suse.com
 
 - do not call reipl mutliple time during installation

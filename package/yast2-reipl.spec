@@ -17,7 +17,7 @@
 
 
 Name:           yast2-reipl
-Version:        3.1.4
+Version:        3.1.5
 Release:        0
 
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
@@ -34,6 +34,7 @@ BuildRequires:  yast2-bootloader
 BuildRequires:  yast2-devtools >= 3.1.10
 BuildRequires:  yast2-storage
 BuildRequires:  yast2-testsuite
+BuildRequires:  rubygem(rspec)
 
 Requires:       yast2-storage yast2-bootloader
 # Wizard::SetDesktopTitleAndIcon
