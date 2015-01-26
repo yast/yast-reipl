@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Jan 26 13:39:42 UTC 2015 - jreidinger@suse.com
+
+- fixed \r character lost during conversion to Ruby
+
+-------------------------------------------------------------------
 Thu Nov  6 12:41:25 CET 2014 - schubi@suse.de
 
 - Fixed parsing of lsreipl output (bnc#902094)
