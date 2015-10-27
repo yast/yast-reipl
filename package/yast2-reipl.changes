@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Oct 27 11:56:09 UTC 2015 - jreidinger@suse.com
+
+- require shutdown in zKVM (bnc#943582)
+- 3.1.7
+
+-------------------------------------------------------------------
 Mon Jan 26 13:39:42 UTC 2015 - jreidinger@suse.com
 
 - fixed \r character lost during conversion to Ruby
