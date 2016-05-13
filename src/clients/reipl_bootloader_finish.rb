@@ -49,9 +49,9 @@ module Yast
             Builtins.y2milestone "fcp comparison for '#{param}' is different?: #{res}"
             res
           end
-          # zkvm require change of IPL (bnc#943582)
-          zkvm = Yast::WFM.Execute(".local.bash", "egrep 'Control Program: KVM' /proc/sysinfo") == 0
-          @different = ccw_different || fcp_different || zkvm
+          # zkvm require change of IPL (bnc#943582). Also the system will be shutdown
+          # according to fate#320262 (see yast_inf_finish client for more information).
+          @different = ccw_different || fcp_different || Arch.is_zkvm
           Builtins.y2milestone("different = %1", @different)
 
           Builtins.y2milestone("newConfiguration['method'] :  %1", Ops.get_string(@newConfiguration, "method", "ERROR"))
