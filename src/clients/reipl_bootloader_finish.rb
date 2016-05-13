@@ -50,8 +50,7 @@ module Yast
             res
           end
           # zkvm require change of IPL (bnc#943582)
-          zkvm = Yast::WFM.Execute(Yast::Path.new(".local.bash"), "egrep 'Control Program: KVM' /proc/sysinfo") == 0
-          @different = ccw_different || fcp_different || zkvm
+          @different = ccw_different || fcp_different || Arch.is_zkvm
           Builtins.y2milestone("different = %1", @different)
 
           Builtins.y2milestone("newConfiguration['method'] :  %1", Ops.get_string(@newConfiguration, "method", "ERROR"))
