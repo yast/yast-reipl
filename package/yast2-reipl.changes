@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Mon Jun  6 08:04:48 UTC 2016 - igonzalezsosa@suse.com
+
+- Stop generating autodocs (fate#320356)
+- 3.1.10
+
+-------------------------------------------------------------------
 Fri May 13 11:26:21 UTC 2016 - igonzalezsosa@suse.com
 
 - Use Arch.is_zkvm method instead of using grep
