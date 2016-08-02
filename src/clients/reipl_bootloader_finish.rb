@@ -66,7 +66,7 @@ module Yast
               _(
                 "\n" +
                   "After shutdown, reload the system\n" +
-                  "with an IPL from DASD '%1'.\n"
+                  "with an IPL from device '%1'.\n"
               ),
               @dev
             )
