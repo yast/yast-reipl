@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Tue Aug  2 22:13:21 UTC 2016 - mfilka@suse.com
+
+- bnc#988379
+  - updated message which is shown at the end of installation on
+    s390
+- 3.1.11
+
+-------------------------------------------------------------------
 Mon Jun  6 08:04:48 UTC 2016 - igonzalezsosa@suse.com
 
 - Stop generating autodocs (fate#320356)
