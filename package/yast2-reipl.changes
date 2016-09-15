@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Thu Sep 15 10:13:27 UTC 2016 - jreidinger@suse.com
+
+- do not print shutdown message if chreipl succeed, as it do
+  reboot (bnc#988379)
+- 3.1.12
+
+-------------------------------------------------------------------
 Tue Aug  2 22:13:21 UTC 2016 - mfilka@suse.com
 
 - bnc#988379
