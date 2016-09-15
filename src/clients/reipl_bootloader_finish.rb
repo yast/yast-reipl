@@ -22,6 +22,9 @@ module Yast
 
       textdomain "reipl"
 
+      # different stands here for detection if after installation manual change of IPL is needed
+      # so shutdown is needed. By default this shutdown is not needed, only in case when chreipl
+      # failed to switch device and in such case ipl_msg is set to helpful text.
       @different = false
       @ipl_msg = ""
 
