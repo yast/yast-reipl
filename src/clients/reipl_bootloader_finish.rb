@@ -22,7 +22,7 @@ module Yast
 
       textdomain "reipl"
 
-      @different = true
+      @different = false
       @ipl_msg = ""
 
       # Other architectures do not support it
