@@ -1,7 +1,7 @@
 #
 # spec file for package yast2-reipl
 #
-# Copyright (c) 2013 SUSE LINUX Products GmbH, Nuernberg, Germany.
+# Copyright (c) 2016 SUSE LINUX GmbH, Nuernberg, Germany.
 #
 # All modifications and additions to the file contributed by third parties
 # remain the property of their copyright owners, unless otherwise agreed
@@ -36,9 +36,12 @@ BuildRequires:  yast2-storage
 BuildRequires:  yast2-testsuite
 BuildRequires:  rubygem(rspec)
 
-Requires:       yast2-storage yast2-bootloader
+Requires:       yast2-bootloader
+Requires:       yast2-storage
 # Wizard::SetDesktopTitleAndIcon
 Requires:       yast2 >= 2.21.22
+# needed for chreipl and lsreipl commands
+Requires:       s390-tools
 
 PreReq:         %fillup_prereq
 
@@ -49,7 +52,6 @@ Requires:       yast2-ruby-bindings >= 1.0.0
 Summary:        YaST2 - IPL loader
 License:        GPL-2.0
 Group:          System/YaST
-
 
 %description
 Module for loading IPL from running system on S/390
@@ -62,7 +64,6 @@ Module for loading IPL from running system on S/390
 
 %install
 %yast_install
-
 
 %post
 %{fillup_only -ns security checksig}
