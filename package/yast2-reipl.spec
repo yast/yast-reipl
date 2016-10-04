@@ -23,17 +23,10 @@ Release:        0
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 Source0:        %{name}-%{version}.tar.bz2
 
-BuildRequires:  docbook-xsl-stylesheets
-BuildRequires:  doxygen
-BuildRequires:  libxslt
-BuildRequires:  perl-XML-Writer
-BuildRequires:  sgml-skel
-BuildRequires:  update-desktop-files
 BuildRequires:  yast2
-BuildRequires:  yast2-bootloader
 BuildRequires:  yast2-devtools >= 3.1.10
-BuildRequires:  yast2-storage
 BuildRequires:  yast2-testsuite
+BuildRequires:  update-desktop-files
 BuildRequires:  rubygem(rspec)
 
 Requires:       yast2-bootloader
@@ -52,6 +45,7 @@ Requires:       yast2-ruby-bindings >= 1.0.0
 Summary:        YaST2 - IPL loader
 License:        GPL-2.0
 Group:          System/YaST
+Url:            http://github.com/yast/yast-reipl
 
 %description
 Module for loading IPL from running system on S/390
