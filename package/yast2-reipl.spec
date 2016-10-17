@@ -17,7 +17,7 @@
 
 
 Name:           yast2-reipl
-Version:        3.1.13
+Version:        3.2.0
 Release:        0
 
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
@@ -28,6 +28,8 @@ BuildRequires:  yast2-devtools >= 3.1.10
 BuildRequires:  yast2-testsuite
 BuildRequires:  update-desktop-files
 BuildRequires:  rubygem(rspec)
+
+ExclusiveArch:  s390 s390x
 
 Requires:       yast2-bootloader
 Requires:       yast2-storage

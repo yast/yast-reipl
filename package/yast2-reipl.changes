@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Mon Oct 17 14:44:37 UTC 2016 - jreidinger@suse.com
+
+- as s390-tools is only on s390 make package s390 only (bsc#951581)
+- 3.2.0
+
+-------------------------------------------------------------------
 Tue Oct  4 09:02:29 UTC 2016 - jreidinger@suse.com
 
 - reduce build dependencies
