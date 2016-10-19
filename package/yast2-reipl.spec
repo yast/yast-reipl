@@ -40,8 +40,6 @@ Requires:       s390-tools
 
 PreReq:         %fillup_prereq
 
-BuildArch:      noarch
-
 Requires:       yast2-ruby-bindings >= 1.0.0
 
 Summary:        YaST2 - IPL loader
