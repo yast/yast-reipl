@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Fri Jan  6 09:15:31 UTC 2017 - jreidinger@suse.com
+
+- fix failed test after new stricker import policy and remove
+  unnecessary dependencies (bsc#932331)
+- 3.2.1
+
+-------------------------------------------------------------------
 Mon Oct 17 14:44:37 UTC 2016 - jreidinger@suse.com
 
 - as s390-tools is only on s390 make package s390 only (bsc#951581)
