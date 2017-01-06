@@ -17,7 +17,7 @@
 
 
 Name:           yast2-reipl
-Version:        3.2.0
+Version:        3.2.1
 Release:        0
 
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
@@ -31,8 +31,6 @@ BuildRequires:  rubygem(rspec)
 
 ExclusiveArch:  s390 s390x
 
-Requires:       yast2-bootloader
-Requires:       yast2-storage
 # Wizard::SetDesktopTitleAndIcon
 Requires:       yast2 >= 2.21.22
 # needed for chreipl and lsreipl commands
