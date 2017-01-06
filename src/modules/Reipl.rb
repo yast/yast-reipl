@@ -35,14 +35,8 @@ module Yast
     def main
       textdomain "reipl"
 
-      Yast.import "Progress"
-      Yast.import "Report"
       Yast.import "Summary"
-      Yast.import "Message"
       Yast.import "FileUtils"
-      Yast.import "Confirm"
-      Yast.import "Popup"
-      Yast.import "Storage"
 
       # Data was modified?
       @modified = false
