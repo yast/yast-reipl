@@ -36,18 +36,10 @@ module Yast
     def main
       textdomain "reipl"
 
-      Yast.import "Summary"
       Yast.import "FileUtils"
 
       # Data was modified?
       @modified = false
-
-
-      @proposal_valid = false
-
-      # Write only, used during autoinstallation.
-      # Don't run services and SuSEconfig, it's all done at one place.
-      @write_only = false
 
       # Abort function
       # return boolean return true if abort
@@ -92,13 +84,6 @@ module Yast
     def Modified
       Builtins.y2debug("modified=%1", @modified)
       @modified
-    end
-
-    # Indicate that the data was modified
-    def SetModified
-      Builtins.y2debug("Reipl::SetModified")
-      @modified = true
-      nil
     end
 
     # Switch device to boot from to /boot/zipl.
@@ -243,130 +228,10 @@ module Yast
       rc
     end
 
-    # Get all reipl settings from the first parameter
-    # (For use by autoinstallation.)
-    # @param [Hash] settings The YCP structure to be imported.
-    # @return [Boolean] True on success
-    def Import(settings)
-      settings = deep_copy(settings)
-      imported = {}
-
-      if Ops.get(settings, "ccw") != nil
-        ccwIn = Ops.get_map(settings, "ccw", {})
-        ccwOut = { "device" => "", "loadparm" => "", "parm" => "" } # SLES 11 and z/VM only
-
-        if Ops.get(ccwIn, "device") != nil
-          Ops.set(ccwOut, "device", Ops.get(ccwIn, "device"))
-        end
-        if Ops.get(ccwIn, "loadparm") != nil
-          Ops.set(ccwOut, "loadparm", Ops.get(ccwIn, "loadparm"))
-        end
-        # SLES 11 and z/VM only
-        if Ops.get(ccwIn, "parm") != nil
-          Ops.set(ccwOut, "parm", Ops.get(ccwIn, "parm"))
-        end
-
-        Ops.set(imported, "ccw", ccwOut)
-      end
-
-      if Ops.get(settings, "fcp") != nil
-        fcpIn = Ops.get_map(settings, "fcp", {})
-        fcpOut = {
-          "device"   => "",
-          "wwpn"     => "",
-          "lun"      => "",
-          "bootprog" => "",
-          "br_lba"   => ""
-        }
-
-        if Ops.get(fcpIn, "device") != nil
-          Ops.set(fcpOut, "device", Ops.get(fcpIn, "device"))
-        end
-        if Ops.get(fcpIn, "wwpn") != nil
-          Ops.set(fcpOut, "wwpn", Ops.get(fcpIn, "wwpn"))
-        end
-        if Ops.get(fcpIn, "lun") != nil
-          Ops.set(fcpOut, "lun", Ops.get(fcpIn, "lun"))
-        end
-        if Ops.get(fcpIn, "bootprog") != nil
-          Ops.set(fcpOut, "bootprog", Ops.get(fcpIn, "bootprog"))
-        end
-        if Ops.get(fcpIn, "br_lba") != nil
-          Ops.set(fcpOut, "br_lba", Ops.get(fcpIn, "br_lba"))
-        end
-
-        Ops.set(imported, "fcp", fcpOut)
-      end
-
-      @reipl_configuration = deep_copy(imported)
-
-      true
-    end
-
-    # Dump the reipl settings to a single map
-    # (For use by autoinstallation.)
-    # @return [Hash] Dumped settings (later acceptable by Import ())
-    def Export
-      deep_copy(@reipl_configuration)
-    end
-
-    # Create a textual summary and a list of unconfigured cards
-    # @return summary of the current configuration
-    def Summary
-      summary = ""
-      status = nil
-      found = nil
-
-      summary = Summary.AddHeader(summary, _("Configured reipl methods"))
-
-      summary = Summary.OpenList(summary)
-
-      found = Ops.get_map(@reipl_configuration, "ccw")
-      if found != nil
-        if Ops.get(@reipl_configuration, "method") == "ccw"
-          status = _("The method ccw is configured and being used.")
-        else
-          status = _("The method ccw is configured.")
-        end
-      else
-        status = _("The method ccw is not supported.")
-      end
-
-      summary = Summary.AddListItem(summary, status)
-
-      found = Ops.get_map(@reipl_configuration, "fcp")
-      if found != nil
-        if Ops.get(@reipl_configuration, "method") == "fcp"
-          status = _("The method fcp is configured and being used.")
-        else
-          status = _("The method fcp is configured.")
-        end
-      else
-        status = _("The method fcp is not supported.")
-      end
-
-      summary = Summary.AddListItem(summary, status)
-
-      summary = Summary.CloseList(summary)
-
-      [summary, []]
-    end
-
-    # Return packages needed to be installed and removed during
-    # Autoinstallation to insure module has all needed software
-    # installed.
-    # @return [Hash] with 2 lists.
-    def AutoPackages
-      { "install" => [], "remove" => [] }
-    end
-
     publish :function => :Modified, :type => "boolean ()"
     publish :variable => :modified, :type => "boolean"
-    publish :variable => :proposal_valid, :type => "boolean"
-    publish :variable => :write_only, :type => "boolean"
     publish :variable => :AbortFunction, :type => "boolean ()"
     publish :function => :Abort, :type => "boolean ()"
-    publish :function => :SetModified, :type => "void ()"
     publish :variable => :reipl_configuration, :type => "map <string, any>"
     publish :variable => :reipl_directory, :type => "string"
     publish :variable => :ccw_directory, :type => "string"
@@ -380,10 +245,6 @@ module Yast
     publish :function => :Read, :type => "boolean ()"
     publish :function => :WriteState, :type => "boolean (map <string, any>)"
     publish :function => :Write, :type => "boolean ()"
-    publish :function => :Import, :type => "boolean (map)"
-    publish :function => :Export, :type => "map ()"
-    publish :function => :Summary, :type => "list ()"
-    publish :function => :AutoPackages, :type => "map ()"
   end
 
   Reipl = ReiplClass.new
