@@ -29,6 +29,7 @@
 # Representation of the configuration of reipl.
 # Input and output routines.
 require "yast"
+require "yast2/execute"
 
 module Yast
   class ReiplClass < Module
@@ -100,16 +101,12 @@ module Yast
       nil
     end
 
-    # Check to see if reipl is supported by the kernel.
-    # @return [Boolean] true if support exists.
-    # Returns the reipl configuration passed in with what it should be for the detected
-    # boot partition.
-    # @param [Hash{String => Object}] configuration an old configuration.
-    # @return a map of the new target configuration.
+    # Switch device to boot from to /boot/zipl.
+    # Used mainly during installation to switch boot device.
+    # @note show popup when switch failed
+    # @return nil
     def IPL_from_boot_zipl
-      # get target information
-      result = Yast::SCR.Execute(path(".target.bash_output"), "chreipl node /boot/zipl")
-      return result["exit"] == 0
+      Yast::Execute.on_target("chreipl", "node", "/boot/zipl")
     end
 
     # Read all reipl settings
