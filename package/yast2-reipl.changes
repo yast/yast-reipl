@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Mon Apr 10 08:40:07 UTC 2017 - jreidinger@suse.com
+
+- use rake for installing instead of autotools
+- show error when chreipl failed to switch (bsc#976609)
+- 3.2.2
+
+-------------------------------------------------------------------
 Fri Jan  6 09:15:31 UTC 2017 - jreidinger@suse.com
 
 - fix failed test after new stricker import policy and remove

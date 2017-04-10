@@ -17,7 +17,7 @@
 
 
 Name:           yast2-reipl
-Version:        3.2.1
+Version:        3.2.2
 Release:        0
 
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
@@ -25,9 +25,9 @@ Source0:        %{name}-%{version}.tar.bz2
 
 BuildRequires:  yast2
 BuildRequires:  yast2-devtools >= 3.1.10
-BuildRequires:  yast2-testsuite
 BuildRequires:  update-desktop-files
 BuildRequires:  rubygem(rspec)
+BuildRequires:  rubygem(yast-rake)
 
 ExclusiveArch:  s390 s390x
 
@@ -51,11 +51,13 @@ Module for loading IPL from running system on S/390
 %prep
 %setup -n %{name}-%{version}
 
+%check
+rake test:unit
+
 %build
-%yast_build
 
 %install
-%yast_install
+rake install DESTDIR="%{buildroot}"
 
 %post
 %{fillup_only -ns security checksig}

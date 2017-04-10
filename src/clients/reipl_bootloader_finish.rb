@@ -22,102 +22,18 @@ module Yast
 
       textdomain "reipl"
 
-      # different stands here for detection if after installation manual change of IPL is needed
-      # so shutdown is needed. By default this shutdown is not needed, only in case when chreipl
-      # failed to switch device and in such case ipl_msg is set to helpful text.
-      @different = false
-      @ipl_msg = ""
-
       # Other architectures do not support it
-      if Arch.s390
-        @oldConfiguration = Reipl.ReadState
+      Reipl.IPL_from_boot_zipl if Arch.s390
 
-        if !Reipl.IPL_from_boot_zipl
-          @newConfiguration = Reipl.ReadState
+      # result is always same, as when chreipl failed we just report problem there
+      # previously we suggest how to manually switch IPL but it probably also
+      # won't boot
+      # see bsc#976609 comment#59
+      ret = { "different" => false, "ipl_msg" => "" }
 
-          @oldCcwMap = Ops.get_map(@oldConfiguration, "ccw")
-          @newCcwMap = Ops.get_map(@newConfiguration, "ccw")
-          @oldFcpMap = Ops.get_map(@oldConfiguration, "fcp")
-          @newFcpMap = Ops.get_map(@newConfiguration, "fcp")
+      Builtins.y2milestone("ret = %1", ret)
 
-          ccw_different = ["device", "loadparm", "parm"].any? do |param|
-            # TODO: why two nils are different?
-            res = @oldCcwMap[param].nil? || @newCcwMap[param].nil? || @oldCcwMap[param] != @newCcwMap[param]
-            Builtins.y2milestone "ccw comparison for '#{param}' is different?: #{res}"
-            res
-          end
-          fcp_different = ["device", "wwpn", "lun", "bootprog", "br_lba"].any? do |param|
-            # TODO: why two nils are different?
-            res = @oldFcpMap[param].nil? || @newFcpMap[param].nil? || @oldFcpMap[param] != @newFcpMap[param]
-            Builtins.y2milestone "fcp comparison for '#{param}' is different?: #{res}"
-            res
-          end
-          # zkvm require change of IPL (bnc#943582). Also the system will be shutdown
-          # according to fate#320262 (see yast_inf_finish client for more information).
-          @different = ccw_different || fcp_different || Arch.is_zkvm
-          Builtins.y2milestone("different = %1", @different)
-
-          Builtins.y2milestone("newConfiguration['method'] :  %1", Ops.get_string(@newConfiguration, "method", "ERROR"))
-          if Ops.get_string(@newConfiguration, "method", "ERROR") == "ccw"
-            Builtins.y2milestone("making ccw ipl text")
-            @dev = Builtins.substring(Ops.get_string(@newCcwMap, "device", ""), 4, 4)
-
-            # TRANSLATORS: part of a shutdown message
-            # %1 is replaced with a device name
-            # Newline at the end is required
-            @ipl_msg = Builtins.sformat(
-              _(
-                "\n" +
-                  "After shutdown, reload the system\n" +
-                  "with an IPL from device '%1'.\n"
-              ),
-              @dev
-            )
-          elsif Ops.get_string(@newConfiguration, "method", "ERROR") == "fcp"
-            Builtins.y2milestone("making fcp ipl text")
-            @dev = Builtins.substring(Ops.get_string(@newFcpMap, "device", ""), 4, 4)
-            @wwpn = Ops.get_string(@newFcpMap, "wwpn", "")
-            @lun = Ops.get_string(@newFcpMap, "lun", "")
-
-            # TRANSLATORS: part of a shutdown message
-            # %1 is replaced with a FCP name
-            # %2 is replaced with a WWPN name
-            # %3 is replaced with a LUN name
-            # Newline at the end is required
-            @ipl_msg = Builtins.sformat(
-              _(
-                "\n" +
-                  "After shutdown, reload the system\n" +
-                  "with an IPL from FCP '%1'\n" +
-                  "with WWPN '%2'\n" +
-                  "and LUN '%3'.\n"
-              ),
-              @dev,
-              @wwpn,
-              @lun
-            )
-          else
-            Builtins.y2warning("making generic ipl text for unknown method")
-            @ipl_msg = Builtins.sformat(
-              _(
-                "\n" +
-                  "After shutdown, reload the system \n" +
-                  "with an IPL from the device \n" +
-                  "that contains /boot"
-              )
-            )
-          end
-        end
-      end
-
-      Builtins.y2milestone("Configuration (reIPL) has been changed: %1", @different)
-      Builtins.y2milestone("Configuration (reIPL) generated shutdown dialog box message: %1", @ipl_msg)
-
-      @ret = { "different" => @different, "ipl_msg" => @ipl_msg }
-
-      Builtins.y2milestone("ret = %1", @ret)
-
-      deep_copy(@ret)
+      ret
     end
   end
 end

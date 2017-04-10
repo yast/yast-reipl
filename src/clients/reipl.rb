@@ -42,7 +42,6 @@ module Yast
 
       Yast.import "Progress"
       Yast.import "Report"
-      Yast.import "Summary"
 
       Yast.import "CommandLine"
       Yast.include self, "reipl/wizards.rb"
