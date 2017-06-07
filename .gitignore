@@ -27,3 +27,9 @@ Makefile.am.common
 .dep
 tmp.*
 *.log
+/.yardoc
+/doc
+test-driver
+test/reipl_test.trs
+testsuite/site.exp
+testsuite/yast2-reipl.sum
