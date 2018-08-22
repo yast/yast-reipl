@@ -41,7 +41,7 @@ PreReq:         %fillup_prereq
 Requires:       yast2-ruby-bindings >= 1.0.0
 
 Summary:        YaST2 - IPL loader
-License:        GPL-2.0
+License:        GPL-2.0-only
 Group:          System/YaST
 Url:            http://github.com/yast/yast-reipl
 
@@ -71,6 +71,6 @@ rake install DESTDIR="%{buildroot}"
 %{yast_yncludedir}/reipl/*
 %dir %{yast_docdir}
 %doc %{yast_docdir}/*
-%doc %{yast_docdir}/COPYING
+%license %{yast_docdir}/COPYING
 
 %changelog
