@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Oct 23 16:45:51 CEST 2018 - schubi@suse.de
+
+- Fixed path to license file. Build error in bsc#1087957.
+- 4.0.1
+
+-------------------------------------------------------------------
 Mon Aug 20 13:27:30 CEST 2018 - schubi@suse.de
 
 - Switched license in spec file from SPDX2 to SPDX3 format.
