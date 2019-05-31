@@ -84,7 +84,7 @@ module Yast
       }
 
       Wizard.CreateDialog
-      Wizard.SetDesktopTitleAndIcon("reipl")
+      Wizard.SetDesktopTitleAndIcon("org.openSUSE.YaST.Reipl")
 
       ret = Sequencer.Run(aliases, sequence)
 
