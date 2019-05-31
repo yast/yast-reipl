@@ -12,15 +12,18 @@
 # license that conforms to the Open Source Definition (Version 1.9)
 # published by the Open Source Initiative.
 
-# Please submit bugfixes or comments via http://bugs.opensuse.org/
+# Please submit bugfixes or comments via https://bugs.opensuse.org/
 #
 
 
 Name:           yast2-reipl
 Version:        4.1.0
 Release:        0
+Summary:        YaST2 - IPL loader
+License:        GPL-2.0-only
+Group:          System/YaST
+Url:            https://github.com/yast/yast-reipl
 
-BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 Source0:        %{name}-%{version}.tar.bz2
 
 BuildRequires:  yast2
@@ -29,48 +32,40 @@ BuildRequires:  update-desktop-files
 BuildRequires:  rubygem(rspec)
 BuildRequires:  rubygem(yast-rake)
 
-ExclusiveArch:  s390 s390x
-
+PreReq:         %fillup_prereq
+Requires:       yast2-ruby-bindings >= 1.0.0
 # Wizard::SetDesktopTitleAndIcon
 Requires:       yast2 >= 2.21.22
 # needed for chreipl and lsreipl commands
 Requires:       s390-tools
 
-PreReq:         %fillup_prereq
-
-Requires:       yast2-ruby-bindings >= 1.0.0
-
-Summary:        YaST2 - IPL loader
-License:        GPL-2.0-only
-Group:          System/YaST
-Url:            http://github.com/yast/yast-reipl
+ExclusiveArch:  s390 s390x
 
 %description
 Module for loading IPL from running system on S/390
 
 %prep
-%setup -n %{name}-%{version}
+%setup -q
 
 %check
-rake test:unit
+%yast_check
 
 %build
 
 %install
-rake install DESTDIR="%{buildroot}"
+%yast_install
+%yast_metainfo
 
 %post
 %{fillup_only -ns security checksig}
 
 %files
-%defattr(-,root,root)
-%{yast_clientdir}/*.rb
-%{yast_moduledir}/*.rb
-%{yast_desktopdir}/*.desktop
-%dir %{yast_yncludedir}/reipl
-%{yast_yncludedir}/reipl/*
-%dir %{yast_docdir}
-%doc %{yast_docdir}/*
+%{yast_clientdir}
+%{yast_moduledir}
+%{yast_desktopdir}
+%{yast_metainfodir}
+%{yast_yncludedir}
+%doc %{yast_docdir}
 %license COPYING
 
 %changelog
