@@ -17,5 +17,6 @@ X-SuSE-YaST-AutoInstResource=reipl
 Icon=yast-reipl
 Exec=xdg-su -c "/sbin/yast2 reipl"
 
-Name=Reipl
-GenericName=reipl
+Name=YaST Reipl
+GenericName=Reipl
+Comment=Load IPL from running system
