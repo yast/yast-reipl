@@ -17,7 +17,7 @@
 
 
 Name:           yast2-reipl
-Version:        4.2.1
+Version:        4.2.2
 Release:        0
 Summary:        YaST2 - IPL loader
 License:        GPL-2.0-only
@@ -38,6 +38,8 @@ Requires:       yast2-ruby-bindings >= 1.0.0
 Requires:       yast2 >= 2.21.22
 # needed for chreipl and lsreipl commands
 Requires:       s390-tools
+
+Supplements:    yast2-s390
 
 ExclusiveArch:  s390 s390x
 
