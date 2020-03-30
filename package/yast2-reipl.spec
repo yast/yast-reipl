@@ -39,6 +39,8 @@ Requires:       yast2 >= 2.21.22
 # needed for chreipl and lsreipl commands
 Requires:       s390-tools
 
+Supplements:    yast2-s390
+
 ExclusiveArch:  s390 s390x
 
 %description
