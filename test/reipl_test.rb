@@ -1,6 +1,6 @@
 #!/usr/bin/env rspec
 
-ENV["Y2DIR"] = File.expand_path("../../src", __FILE__)
+require_relative "test_helper"
 
 require "yast"
 Yast.import "Reipl"
@@ -13,7 +13,7 @@ describe "Reipl#ReadState" do
 
     lsreipl_map = {
       "ccw" => {"device"=>"0.0.7e64", "loadparm"=>"", "parm"=>""},
-      "fcp" => {"device"=>"", "wwpn"=>"", "lun"=>"", 
+      "fcp" => {"device"=>"", "wwpn"=>"", "lun"=>"",
                 "bootprog"=>"", "br_lba"=>"", "bootparms"=>""},
       "method" => "ccw",
       "nss" => {"name"=>"", "loadparm"=>"", "parm"=>""}
