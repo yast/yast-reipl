@@ -17,7 +17,7 @@
 
 
 Name:           yast2-reipl
-Version:        5.0.0
+Version:        5.0.1
 Release:        0
 Summary:        YaST2 - IPL loader
 License:        GPL-2.0-only
@@ -28,7 +28,6 @@ Source0:        %{name}-%{version}.tar.bz2
 
 BuildRequires:  yast2
 BuildRequires:  yast2-devtools >= 4.2.2
-BuildRequires:  update-desktop-files
 BuildRequires:  rubygem(%{rb_default_ruby_abi}:rspec)
 BuildRequires:  rubygem(%{rb_default_ruby_abi}:yast-rake)
 
